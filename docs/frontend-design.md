@@ -6,7 +6,9 @@ The user-supplied analytics screenshot establishes the compact hierarchy: greeti
 
 Light: canvas #f0eef2, paper #faf9fb, surface #e6e1e9, ink #2c2630, muted #756b7b, accent #725580. Dark: canvas #1c1821, paper #28222f, ink #f0eaf4, muted #b0a3b9, accent #cfb5df. No red glow, blue, or sage in the active theme. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.
 
-Buttons use 9px vertical/21px horizontal padding, 38px minimum height, 13px radius and CSS corner-shape: squircle. Panels use 22px squircle corners. Browsers without corner-shape support retain rounded corners. Native focus outlines remain.
+Buttons use 9px vertical/21px horizontal padding, 38px minimum height, 18px radius and CSS corner-shape: squircle. Panels use 28px squircle corners; dialogs use 32px and are centered horizontally and vertically, with a scrollable height limit on small screens. Browsers without corner-shape support retain rounded corners. Native focus outlines remain.
+
+Hover feedback changes icon stroke color only. Interactive backgrounds remain fixed; icons do not rotate, shift, or scale on hover. Selection highlights remain for the active route and keyboard command selection. Press feedback, dialog transitions, and reduced-motion support are preserved.
 
 ## Tailwind implementation
 

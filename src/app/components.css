@@ -125,7 +125,7 @@
       color 0.16s;
   }
   .nav-item:hover {
-    @apply [background:var(--surface-hover)] [color:var(--text)];
+    @apply [color:var(--text)];
   }
   .nav-item.selected {
     @apply [color:var(--accent)] [background:var(--selected)];
@@ -162,7 +162,7 @@
     @apply grid [place-items:center] [width:40px] [height:40px] [border-radius:50%] [background:transparent] [color:var(--muted)] [font-size:14px];
   }
   .icon-button:hover {
-    @apply [background:var(--surface-hover)] [color:var(--text)];
+    @apply [color:var(--text)];
   }
   .button {
     @apply [min-height:44px] [padding:12px_20px] inline-flex justify-center items-center [gap:9px] [border-radius:12px] [font-size:14px] [line-height:1.4] [font-weight:550];
@@ -174,14 +174,8 @@
   .button.primary {
     @apply [background:var(--accent-button)] [color:#fff];
   }
-  .button.primary:hover:not(:disabled) {
-    @apply [background:var(--accent-hover)];
-  }
   .button.secondary {
     @apply [background:var(--surface)] [color:var(--text)];
-  }
-  .button.secondary:hover:not(:disabled) {
-    @apply [background:var(--surface-hover)];
   }
   .button:active:not(:disabled) {
     transform: scale(0.98);
@@ -250,9 +244,6 @@
   .project-row {
     @apply [padding:14px_3px] [border-radius:13px] [min-height:78px];
     transition: background 0.16s;
-  }
-  .project-row:hover {
-    @apply [background:var(--surface)];
   }
   .project-row > svg {
     @apply [color:var(--muted)];
@@ -425,9 +416,6 @@
   .delivery-row {
     @apply grid [grid-template-columns:54px_1fr_180px_22px] [gap:22px] items-center [border-radius:14px] [padding:18px_12px];
   }
-  .delivery-row:hover {
-    @apply [background:var(--surface)];
-  }
   .delivery-description strong,
   .delivery-description span {
     @apply block;
@@ -537,9 +525,6 @@
   .detail-tabs a {
     @apply [padding:10px_18px] [border-radius:12px] [font-size:14px] [color:var(--muted)] [font-weight:500] whitespace-nowrap;
   }
-  .detail-tabs a:hover {
-    @apply [background:var(--surface)];
-  }
   .detail-tabs a.active {
     @apply [background:var(--selected)] [color:var(--accent)];
   }
@@ -560,9 +545,6 @@
   }
   .evidence-row {
     @apply [width:100%] grid [grid-template-columns:46px_minmax(0,_1fr)_auto_18px] [gap:15px] items-center text-left [padding:15px_7px] [border-radius:13px] [background:transparent];
-  }
-  .evidence-row:hover {
-    @apply [background:var(--surface)];
   }
   .evidence-icon {
     @apply grid [place-items:center] [width:44px] [height:44px] [border-radius:11px] [background:var(--surface)] [color:var(--muted)];
@@ -657,9 +639,6 @@
   }
   .select-source {
     @apply flex items-center [gap:16px] justify-between [border-radius:13px] [padding:17px_8px];
-  }
-  .select-source:hover {
-    @apply [background:var(--surface)];
   }
   .source-checkbox {
     @apply flex [gap:18px] items-center [flex:1] [min-width:0] cursor-pointer;
@@ -1280,9 +1259,6 @@
     transition:
       background 0.15s,
       transform 0.25s;
-  }
-  .attention-row:hover {
-    @apply [background:var(--surface-hover)];
   }
   .attention-icon {
     @apply [width:32px] [height:32px] [border-radius:7px] [color:var(--accent)] [background:var(--accent-soft)] grid [place-items:center] shrink-0;

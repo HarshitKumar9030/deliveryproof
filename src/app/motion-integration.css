@@ -7,7 +7,7 @@
   --digit-stagger: var(--duration-stagger);
   --digit-ease: var(--ease-smooth-out);
   --check-y-amount: 8px;
-  --check-rotate-from: -12deg;
+  --check-rotate-from: 0deg;
   --check-blur-from: 2px;
   --icon-swap-start-scale: 0.6;
 }
@@ -42,9 +42,6 @@
 }
 .navigation .nav-item.selected {
   color: var(--text);
-  background: transparent;
-}
-.navigation .nav-item:hover {
   background: transparent;
 }
 .navigation .nav-item:not(.selected):hover {
@@ -82,7 +79,6 @@
   border-radius: 6px;
 }
 .detail-tabs a:hover {
-  background: transparent;
   color: var(--accent);
 }
 .detail-tabs a.active:hover {
@@ -117,31 +113,8 @@
   transition: transform var(--duration-fast) var(--ease-smooth-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .button:hover:not(:disabled),
-  .spotlight-button:hover {
-    transform: translateY(-2px);
-  }
-  .button:hover:not(:disabled) > .lucide-arrow-right,
-  .spotlight-button:hover > svg,
-  .text-link:hover > svg,
-  .text-button:hover > .lucide-arrow-right,
-  .project-row:hover > svg,
-  .delivery-row:hover > svg {
-    transform: translateX(var(--distance-micro));
-  }
-  .project-row:hover .client-mark,
-  .delivery-row:hover .client-mark {
-    transform: scale(1.08) rotate(-3deg);
-  }
-  .icon-button:hover {
-    transform: rotate(-8deg);
-  }
-  .topbar .button:hover .lucide-plus {
-    transform: rotate(90deg);
-  }
   .evidence-row:hover .evidence-icon {
     color: var(--accent);
-    transform: translateY(-2px);
   }
 }
 .project-row,

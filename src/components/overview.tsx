@@ -125,7 +125,7 @@ export function Overview() {
           </section>
           <ProjectList projects={projects} />
         </div>
-        <aside className="squircle grid min-w-0 gap-7 rounded-[22px] bg-paper px-[21px] py-6 min-[481px]:max-[1000px]:grid-cols-2 min-[1001px]:block">
+        <aside className="squircle grid min-w-0 gap-7 rounded-[28px] bg-paper px-[21px] py-6 min-[481px]:max-[1000px]:grid-cols-2 min-[1001px]:block">
           <section className="attention-section" aria-label="Needs attention">
             <h2>Needs attention</h2>
             {broken && (
