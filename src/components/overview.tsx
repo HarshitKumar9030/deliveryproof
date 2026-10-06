@@ -14,6 +14,7 @@ import { useDemo } from '@/demo/demo-provider';
 import { money, type EvidenceKind } from '@/demo/data';
 import { ProjectList } from './project-list';
 import { SummaryCards } from './summary-cards';
+import { WorkspaceStatistics, ConfirmationStatistics } from './workspace-statistics';
 
 const icons: Record<EvidenceKind, typeof FileText> = {
   Agreement: FileText,
@@ -59,70 +60,11 @@ export function Overview() {
       <SummaryCards />
       <div className="grid items-start gap-[18px] min-[1001px]:grid-cols-[minmax(0,1fr)_270px] min-[1001px]:max-[1150px]:grid-cols-[minmax(0,1fr)_230px]">
         <div className="min-w-0">
-          <section className="evidence-chart" aria-label="Evidence coverage">
-            <div className="chart-heading">
-              <div>
-                <h2>Evidence coverage</h2>
-                <p>Preserved records across your projects</p>
-              </div>
-              <span className="caption">
-                {projects.reduce((sum, p) => sum + p.evidence.length, 0)}{' '}
-                records
-              </span>
-            </div>
-            <div className="evidence-bars">
-              {projects.map((project) => (
-                <Link
-                  className="evidence-bar-group"
-                  href={`/projects/${project.id}?tab=evidence`}
-                  key={project.id}
-                  aria-label={`${project.client}: ${project.evidence.length} evidence records`}
-                >
-                  <span className="bar-count">{project.evidence.length}</span>
-                  <div className="evidence-bar-track">
-                    <span
-                      className="evidence-shard"
-                      style={{
-                        height: `${Math.min((project.evidence.length / Math.max(5, ...projects.map((p) => p.evidence.length))) * 100, 100)}%`,
-                      }}
-                    >
-                      <svg
-                        viewBox="0 0 100 120"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <polygon
-                          className="shard-front"
-                          points="0,28 60,40 60,120 0,104"
-                        />
-                        <polygon
-                          className="shard-side"
-                          points="60,40 100,24 100,100 60,120"
-                        />
-                        <polygon
-                          className="shard-top"
-                          points="0,28 60,0 100,24 60,40"
-                        />
-                        <polygon
-                          className="shard-glint"
-                          points="5,33 12,35 12,102 5,100"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-                  <span className="bar-label">
-                    {project.client.split(' ')[0]}
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <p className="chart-footnote">
-              A record shows what happened. Confirmation shows acceptance.
-            </p>
-          </section>
+          <WorkspaceStatistics projects={projects} />
           <ProjectList projects={projects} />
         </div>
         <aside className="squircle grid min-w-0 gap-7 rounded-[28px] bg-paper px-[21px] py-6 min-[481px]:max-[1000px]:grid-cols-2 min-[1001px]:block">
+          <ConfirmationStatistics projects={projects} />
           <section className="attention-section" aria-label="Needs attention">
             <h2>Needs attention</h2>
             {broken && (

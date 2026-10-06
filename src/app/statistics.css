@@ -1,0 +1,157 @@
+@layer components {
+  .statistics-chart {
+    @apply min-w-0 rounded-[28px] bg-paper p-7 mb-7;
+    corner-shape: squircle;
+    box-shadow: var(--card-shadow);
+  }
+  .statistics-heading {
+    @apply flex justify-between items-start gap-4;
+  }
+  .statistics-heading h2 {
+    @apply text-lg font-medium tracking-[-0.4px];
+  }
+  .statistics-heading p {
+    @apply text-[11px] text-muted mt-1.5;
+  }
+  .statistics-switch {
+    @apply flex gap-1 shrink-0 bg-surface p-1 rounded-2xl;
+  }
+  .statistics-switch button {
+    @apply flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] text-muted;
+    transition: color 150ms ease;
+  }
+  .statistics-switch button[aria-pressed='true'] {
+    @apply bg-paper text-ink;
+    box-shadow: var(--card-shadow);
+  }
+  .statistics-total {
+    @apply flex items-baseline gap-3 mt-7 mb-2;
+  }
+  .statistics-total strong {
+    @apply text-[36px] font-medium tracking-[-1.5px] leading-none tabular-nums;
+  }
+  .statistics-total > span {
+    @apply text-[11px] text-muted;
+  }
+  .statistics-plot {
+    @apply relative mt-7;
+  }
+  .statistics-gridlines {
+    @apply absolute inset-x-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none;
+  }
+  .statistics-gridlines span {
+    @apply h-px bg-surface;
+  }
+  .statistics-columns {
+    @apply relative flex gap-5 overflow-x-auto pb-1;
+  }
+  .statistics-column {
+    @apply min-w-[62px] flex-1 flex flex-col items-center gap-3;
+  }
+  .statistics-bar-value {
+    @apply text-[11px] text-muted tabular-nums;
+  }
+  .statistics-bar-space {
+    @apply flex items-end justify-center h-[170px] w-full;
+  }
+  .statistics-shard {
+    @apply block w-[min(100%,54px)];
+    transition: filter 150ms ease;
+  }
+  .statistics-clip {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: dp-statistics-reveal 600ms cubic-bezier(0.22,1,0.36,1) var(--bar-delay,0ms) both;
+  }
+  .statistics-shard-seam {
+    stroke: var(--shard-top);
+    stroke-width: 0.7;
+    fill: none;
+    opacity: 0.6;
+  }
+  .statistics-project-label {
+    @apply flex items-center justify-center gap-1 text-[10px] text-muted whitespace-nowrap;
+  }
+  .statistics-footnote {
+    @apply flex items-center gap-2 mt-6 text-[10px] text-muted leading-relaxed;
+  }
+  .statistics-legend-dot {
+    @apply size-1.5 rounded-full bg-accent shrink-0;
+  }
+  .statistics-empty {
+    @apply py-5 text-sm text-muted;
+  }
+  .confirmation-statistics {
+    @apply grid gap-4 mb-7;
+  }
+  .confirmation-ring {
+    @apply relative size-[94px];
+  }
+  .confirmation-ring svg {
+    @apply size-full;
+    transform: rotate(-90deg);
+  }
+  .confirmation-ring circle {
+    fill: none;
+    stroke-width: 6;
+  }
+  .confirmation-ring-track {
+    stroke: var(--surface);
+  }
+  .confirmation-ring-fill {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    animation: dp-statistics-ring 750ms cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .confirmation-ring > strong {
+    @apply absolute inset-0 grid place-content-center text-[24px] font-medium tracking-tight;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirmation-ring small {
+    @apply text-xs ml-0.5 text-muted;
+  }
+  .confirmation-statistics .workspace-eyebrow {
+    @apply text-[9px] tracking-[1.2px] mb-2;
+  }
+  .confirmation-statistics h2 {
+    @apply text-sm font-medium;
+  }
+  .confirmation-statistics p {
+    @apply text-[11px] text-muted leading-relaxed mt-2;
+  }
+  @keyframes dp-statistics-reveal {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+  @keyframes dp-statistics-ring {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: var(--ring-offset); }
+  }
+  @media (hover:hover) and (pointer:fine) {
+    .statistics-column:hover .statistics-shard { filter: brightness(1.12); }
+    .statistics-column:hover .statistics-project-label { @apply text-ink; }
+  }
+  @media (max-width:1150px) {
+    .statistics-heading { @apply flex-col; }
+  }
+  @media (max-width:1000px) and (min-width:481px) {
+    .confirmation-statistics { @apply [grid-column:1/-1] [grid-template-columns:94px_minmax(0,1fr)] items-center mb-0; }
+  }
+  @media (max-width:760px) {
+    .statistics-chart { @apply p-5; }
+    .statistics-heading h2 { @apply text-base; }
+    .statistics-total strong { @apply text-[32px]; }
+    .statistics-columns { @apply gap-3; }
+    .statistics-bar-space { @apply h-[140px]; }
+    .statistics-bar-value { @apply text-[10px]; }
+    .statistics-column { @apply min-w-[50px]; }
+    .confirmation-statistics { @apply [grid-template-columns:80px_minmax(0,1fr)] items-center; }
+    .confirmation-ring { @apply size-20; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .statistics-clip, .confirmation-ring-fill { animation:none; }
+    .statistics-shard { transition:none; }
+  }
+}
