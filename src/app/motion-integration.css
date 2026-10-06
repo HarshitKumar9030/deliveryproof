@@ -1,0 +1,467 @@
+/* App-specific hooks. The transition recipes in motion.css stay unchanged. */
+:root {
+  --tabs-dur: var(--duration-fast);
+  --tabs-ease: var(--ease-smooth-out);
+  --modal-open-dur: 250ms;
+  --modal-close-dur: 150ms;
+  --digit-stagger: var(--duration-stagger);
+  --digit-ease: var(--ease-smooth-out);
+  --check-y-amount: 8px;
+  --check-rotate-from: -12deg;
+  --check-blur-from: 2px;
+  --icon-swap-start-scale: 0.6;
+}
+.theme-root {
+  --tabs-text-muted: var(--muted);
+  --tabs-text-active: var(--text);
+  --tabs-bar-bg: var(--surface);
+  --tabs-pill-bg: var(--selected);
+}
+.t-tabs-pill {
+  top: 0;
+  opacity: 0;
+  border-radius: 6px;
+}
+.navigation.t-tabs {
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  gap: 4px;
+}
+.navigation .t-tabs-pill {
+  border-radius: 7px;
+}
+.navigation .nav-item {
+  height: auto;
+  font-size: 13px;
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: var(--text);
+}
+.navigation .nav-item.selected {
+  color: var(--text);
+  background: transparent;
+}
+.navigation .nav-item:hover {
+  background: transparent;
+}
+.navigation .nav-item:not(.selected):hover {
+  color: var(--accent);
+}
+.segmented.t-tabs {
+  padding: 0;
+  gap: 2px;
+  border-radius: 6px;
+}
+.segmented .t-tab {
+  height: auto;
+}
+.segmented button.active {
+  color: var(--text);
+  background: transparent;
+}
+.segmented button:not(.active):hover {
+  color: var(--accent);
+}
+.detail-tabs.t-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: transparent;
+}
+.detail-tabs .t-tab {
+  height: auto;
+}
+.detail-tabs a.active {
+  color: var(--text);
+  background: transparent;
+}
+.detail-tabs .t-tabs-pill {
+  border-radius: 6px;
+}
+.detail-tabs a:hover {
+  background: transparent;
+  color: var(--accent);
+}
+.detail-tabs a.active:hover {
+  color: var(--text);
+}
+.t-icon-swap .t-icon {
+  display: grid;
+  place-items: center;
+}
+.button,
+.spotlight-button,
+.icon-button,
+.citation-link {
+  transition:
+    transform var(--duration-fast) var(--ease-smooth-out),
+    background var(--duration-quick) var(--ease-out),
+    color var(--duration-quick) var(--ease-out);
+}
+.button:active:not(:disabled),
+.spotlight-button:active,
+.icon-button:active,
+.citation-link:active {
+  transform: scale(0.96);
+  transition-duration: var(--duration-micro);
+}
+.button > svg,
+.spotlight-button > svg,
+.text-link > svg,
+.text-button > svg,
+.project-row > svg,
+.delivery-row > svg {
+  transition: transform var(--duration-fast) var(--ease-smooth-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled),
+  .spotlight-button:hover {
+    transform: translateY(-2px);
+  }
+  .button:hover:not(:disabled) > .lucide-arrow-right,
+  .spotlight-button:hover > svg,
+  .text-link:hover > svg,
+  .text-button:hover > .lucide-arrow-right,
+  .project-row:hover > svg,
+  .delivery-row:hover > svg {
+    transform: translateX(var(--distance-micro));
+  }
+  .project-row:hover .client-mark,
+  .delivery-row:hover .client-mark {
+    transform: scale(1.08) rotate(-3deg);
+  }
+  .icon-button:hover {
+    transform: rotate(-8deg);
+  }
+  .topbar .button:hover .lucide-plus {
+    transform: rotate(90deg);
+  }
+  .evidence-row:hover .evidence-icon {
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+}
+.project-row,
+.delivery-row,
+.evidence-row,
+.select-source {
+  transition:
+    background var(--duration-quick) var(--ease-out),
+    transform var(--duration-fast) var(--ease-smooth-out);
+}
+.client-mark,
+.evidence-icon {
+  transition:
+    transform var(--duration-fast) var(--ease-smooth-out),
+    color var(--duration-quick) var(--ease-out);
+}
+.project-row:active,
+.delivery-row:active,
+.evidence-row:active {
+  transform: scale(0.99);
+}
+.project-row:focus-visible,
+.delivery-row:focus-visible {
+  background: var(--surface);
+}
+.form-stack label > input,
+.form-stack label > textarea,
+.response-draft {
+  transition: background var(--duration-fast) var(--ease-smooth-out);
+}
+.form-stack label > input:focus,
+.form-stack label > textarea:focus,
+.response-draft:focus {
+  background: var(--accent-soft);
+}
+.search-field {
+  transition: background var(--duration-fast) var(--ease-smooth-out);
+}
+.search-field:focus-within {
+  background: var(--selected);
+}
+.route-enter {
+  animation: dp-route-enter var(--duration-fast) var(--ease-smooth-out) both;
+}
+.panel-enter {
+  animation: dp-panel-enter var(--duration-slow) var(--ease-smooth-out) both;
+}
+.response-step-content {
+  outline: none;
+}
+.response-step-content h2:focus {
+  outline: none;
+}
+.hero-title h1 {
+  animation: dp-reveal var(--duration-very-slow) var(--ease-smooth-out) both;
+}
+.hero-title p {
+  animation: dp-reveal var(--duration-very-slow) var(--ease-smooth-out)
+    var(--duration-stagger) both;
+}
+.handover-panel {
+  animation: dp-reveal var(--duration-very-slow) var(--ease-smooth-out)
+    var(--duration-micro) both;
+}
+.editorial-grid {
+  animation: dp-reveal var(--duration-very-slow) var(--ease-smooth-out)
+    calc(var(--duration-stagger) * 3) both;
+}
+.stage-track > span {
+  transform-origin: left center;
+  animation: dp-track-in var(--duration-very-slow) var(--ease-smooth-out)
+    calc(var(--duration-stagger) * 4) both;
+  transition: width var(--duration-very-slow) var(--ease-smooth-out);
+}
+.handover-stage:nth-child(2) .stage-track > span {
+  animation-delay: calc(var(--duration-stagger) * 5);
+}
+.handover-stage:nth-child(3) .stage-track > span {
+  animation-delay: calc(var(--duration-stagger) * 6);
+}
+.handover-stage:nth-child(4) .stage-track > span {
+  animation-delay: calc(var(--duration-stagger) * 7);
+}
+.project-row {
+  animation: dp-row-in var(--duration-fast) var(--ease-smooth-out) both;
+}
+.project-row:nth-of-type(2) {
+  animation-delay: var(--duration-stagger);
+}
+.project-row:nth-of-type(3) {
+  animation-delay: calc(var(--duration-stagger) * 2);
+}
+.project-row:nth-of-type(4) {
+  animation-delay: calc(var(--duration-stagger) * 3);
+}
+.confirmation-panel {
+  animation: dp-panel-enter var(--duration-slow) var(--ease-smooth-out) both;
+}
+.confirmation-panel > .t-success-check {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.project-progress .done > span,
+.response-steps .current > span {
+  animation: dp-step-in var(--duration-fast) var(--ease-smooth-out) both;
+}
+.packet-success h2,
+.packet-success > p {
+  animation: dp-reveal var(--duration-very-slow) var(--ease-smooth-out)
+    var(--duration-micro) both;
+}
+.form-error {
+  animation: dp-error-nudge var(--duration-fast) var(--ease-smooth-out);
+}
+.dialog.t-modal::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity var(--modal-open-dur) var(--modal-ease);
+}
+.dialog.t-modal.is-open::backdrop {
+  opacity: 1;
+}
+.dialog.t-modal.is-closing::backdrop {
+  opacity: 0;
+  transition-duration: var(--modal-close-dur);
+}
+.dialog.is-open .form-stack > label,
+.dialog.is-open .form-row {
+  animation: dp-reveal var(--duration-slow) var(--ease-smooth-out)
+    var(--duration-stagger) both;
+}
+.toast-position {
+  position: fixed;
+  bottom: 24px;
+  left: calc(50% + 110px);
+  transform: translateX(-50%);
+  z-index: 40;
+  width: max-content;
+  max-width: min(650px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.toast.t-toast {
+  position: static;
+  left: auto;
+  bottom: auto;
+  max-width: none;
+  border-radius: 16px;
+  padding: 15px 20px;
+  font-size: 13px;
+  background: var(--toast);
+  color: var(--toast-text);
+}
+.toast > .t-success-check {
+  flex-shrink: 0;
+}
+.motion-checkbox {
+  position: relative;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.motion-checkbox > input[type='checkbox'] {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  z-index: 2;
+}
+.motion-checkbox .t-check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--selected-control);
+  color: #fff;
+}
+.motion-checkbox .t-check[aria-checked='true'] {
+  background: var(--button-blue);
+}
+.motion-checkbox .t-check > svg {
+  width: 20px;
+  height: 20px;
+}
+.motion-checkbox input:focus-visible + .t-check {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.review-confirmation .motion-checkbox {
+  margin-top: 2px;
+}
+.select-source:has(input:checked) {
+  background: var(--accent-soft);
+}
+.source-selection {
+  display: grid;
+  gap: 8px;
+}
+.select-source {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+@keyframes dp-route-enter {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-base);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes dp-panel-enter {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-base);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+@keyframes dp-reveal {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-medium);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes dp-track-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes dp-row-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--distance-micro);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes dp-step-in {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes dp-error-nudge {
+  0%,
+  100% {
+    translate: 0;
+  }
+  25% {
+    translate: -4px;
+  }
+  65% {
+    translate: 3px;
+  }
+}
+@media (max-width: 1300px) {
+  .toast-position {
+    left: calc(50% + 98px);
+  }
+}
+@media (max-width: 760px) {
+  .navigation.t-tabs {
+    gap: 5px;
+  }
+  .navigation .nav-item {
+    padding: 10px 11px;
+    font-size: 12px;
+    border-radius: 14px;
+  }
+  .navigation .t-tabs-pill {
+    border-radius: 14px;
+  }
+  .toast-position {
+    left: 50%;
+    bottom: 16px;
+  }
+  .toast.t-toast {
+    font-size: 12px;
+    padding: 14px 16px;
+  }
+}
+@media (max-width: 480px) {
+  .navigation .nav-item {
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .t-success-check {
+    opacity: 1;
+  }
+  .t-success-check svg path {
+    stroke-dashoffset: 0 !important;
+  }
+}

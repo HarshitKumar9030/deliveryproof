@@ -7,22 +7,34 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "dev:api": "tsx watch src/server.ts",
+    "build:api": "tsc -p tsconfig.server.json",
+    "start:api": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run build"
+    "check": "npm run typecheck && npm test && npm run build:api && npm run build"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.5.1",
     "@google/genai": "2.27.0",
     "ag-grid-community": "36.2.0",
     "dotenv": "18.0.5",
+    "lucide-react": "1.52.0",
+    "next": "16.3.8",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "postcss": "^8.5.29",
+    "tailwindcss": "^4.3.3",
     "tsx": "4.23.15",
     "typescript": "7.0.2"
   }

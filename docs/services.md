@@ -4,6 +4,7 @@
 
 | Technology | Files | Current scope |
 | --- | --- | --- |
+| Next.js frontend | `src/app/`, `src/components/`, `src/demo/` | Local demo projects, delivery events, source inspection, reviewed JSON packet export. No provider calls or authenticated data |
 | PayPal | `src/services/paypal/` | Sandbox OAuth, create/capture order, read dispute, verify webhook via PayPal, multipart PDF evidence transport |
 | Elastic | `src/services/elastic/` | Index mapping, scoped indexing and lexical search; vector search is a later enhancement |
 | AI / Gemini | `src/services/ai/` | Google GenAI structured JSON output, scope checks, citation-ID validation; configurable model |
@@ -48,7 +49,7 @@ Do not automatically retry evidence submission: first inspect the case if its re
 1. Authentication and project membership checks. Scope validation prevents mixed-record analysis but does not authenticate users.
 2. Durable database for projects, original event records, case links, approvals, and submission receipts.
 3. Verified webhook ingestion with atomic event deduplication and a durable job outbox/dispatcher.
-4. Delivery portal, acknowledgements, authorized uploads, MIME validation, and PDF packet export.
+4. Real delivery portal and acknowledgements, authorized uploads, MIME validation, and PDF packet export. The Next.js frontend currently demonstrates these records with local synthetic data only.
 5. Reviewed submission orchestration: verify authenticated reviewer, bind case to payment/project, re-fetch deadline and allowed action, record the approval and packet hash, then invoke PayPal transport.
 6. AG Studio dashboard and its license setup. AG Grid contracts alone are not AG Studio integration.
 7. Semantic retrieval, evidence quotation checks, and evaluations. Valid citation IDs do not prove that a generated statement is supported by its cited text.
