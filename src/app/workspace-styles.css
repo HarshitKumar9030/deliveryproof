@@ -487,6 +487,149 @@
   .mobile-menu-toggle {
     @apply hidden;
   }
+  /* Explicit modal transitions prevent theme fades from replacing open/close motion. */
+  .dialog.t-modal {
+    --modal-open-dur: 180ms;
+    --modal-close-dur: 120ms;
+    --modal-scale: 0.98;
+    --modal-scale-close: 0.99;
+    transition: transform var(--modal-open-dur) var(--ease-smooth-out),
+      opacity var(--modal-open-dur) ease-out;
+  }
+  .dialog.t-modal.is-closing {
+    transition-duration: var(--modal-close-dur);
+  }
+  .mobile-menu-toggle .hamburger-icon {
+    transition: transform 180ms var(--ease-smooth-out), color 150ms ease-out;
+  }
+  .mobile-menu-toggle[aria-expanded='true'] .hamburger-icon {
+    transform: rotate(5deg);
+  }
+  .mobile-menu .dialog-heading .icon-button {
+    @apply bg-surface;
+  }
+  .command-trigger {
+    @apply gap-2.5 w-full min-w-0;
+  }
+  .command-trigger > svg, .command-trigger > kbd {
+    @apply shrink-0;
+  }
+  .command-trigger > span {
+    @apply flex-1 text-left truncate;
+  }
+  .dialog.command-palette {
+    @apply w-[min(720px,calc(100vw-32px))] p-6;
+  }
+  .command-input {
+    @apply rounded-2xl bg-surface px-4 py-2 mb-3;
+  }
+  .command-input input {
+    @apply min-w-0 flex-1 text-base;
+  }
+  .command-result {
+    @apply px-4 py-3.5 min-w-0;
+  }
+  .command-result strong {
+    @apply shrink-0;
+  }
+  .command-result span {
+    @apply truncate min-w-0;
+  }
+  .command-result > svg {
+    @apply shrink-0;
+  }
+  .response-builder {
+    @apply max-w-none;
+  }
+  .response-steps {
+    @apply max-w-none rounded-2xl bg-surface px-6 py-4 mb-5;
+  }
+  .response-workspace {
+    @apply grid items-start gap-5 [grid-template-columns:minmax(0,1fr)_260px];
+  }
+  .response-step-content {
+    @apply min-w-0 bg-paper rounded-[28px] p-7;
+    corner-shape: squircle;
+    box-shadow: var(--card-shadow);
+    animation: dp-response-enter 180ms var(--ease-smooth-out) both;
+  }
+  .response-context {
+    @apply min-w-0 rounded-[28px] bg-surface p-6;
+    corner-shape: squircle;
+  }
+  .response-context h2 {
+    @apply text-base font-medium tracking-tight;
+  }
+  .response-context > p {
+    @apply text-xs leading-relaxed text-muted mt-2;
+  }
+  .response-context-stats {
+    @apply grid gap-3 my-6 text-xs;
+  }
+  .response-context-stats > div {
+    @apply flex items-center justify-between gap-3;
+  }
+  .response-context-stats dt {
+    @apply text-muted;
+  }
+  .response-context-stats dd {
+    @apply m-0 font-medium;
+  }
+  .response-context h3 {
+    @apply text-xs font-medium mb-3;
+  }
+  .response-coverage {
+    @apply grid gap-3 list-none p-0 m-0;
+  }
+  .response-coverage li {
+    @apply flex items-center gap-2 text-[11px];
+  }
+  .response-coverage svg {
+    @apply text-accent shrink-0;
+  }
+  .response-coverage small {
+    @apply ml-auto text-muted text-[10px];
+  }
+  .response-context .response-context-note {
+    @apply mt-6 text-[11px];
+  }
+  .source-selection {
+    @apply grid gap-2.5 my-6;
+  }
+  .select-source {
+    @apply bg-surface rounded-[18px] px-4 py-4 gap-3;
+  }
+  .source-checkbox {
+    @apply gap-3;
+  }
+  .source-checkbox > span {
+    @apply min-w-0;
+  }
+  .response-draft {
+    @apply rounded-[20px] min-h-[360px] p-5;
+  }
+  .project-progress {
+    box-shadow: var(--card-shadow);
+  }
+  @keyframes dp-response-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 1150px) {
+    .response-workspace { @apply grid-cols-1; }
+    .response-context { @apply max-w-none; }
+  }
+  @media (max-width: 760px) {
+    .command-trigger { @apply w-11; }
+    .dialog.command-palette { @apply p-4; }
+    .response-step-content { @apply p-5; }
+    .response-steps { @apply gap-2 px-3 py-3; }
+    .response-steps li { @apply flex-col gap-2 text-[10px] text-center flex-1; }
+    .select-source { @apply flex-wrap; }
+    .source-checkbox { @apply [flex-basis:100%]; }
+    .source-preview-button { @apply ml-9 text-xs; }
+    .response-step-content .button-row { @apply items-start; }
+  }
   .mobile-menu-link[aria-current='page'] {
     @apply bg-selected text-ink;
   }

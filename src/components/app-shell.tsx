@@ -87,13 +87,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p className="nav-section-label">Workspace</p>
         <button
           className="icon-button mobile-menu-toggle"
-          aria-label="Open navigation menu"
+          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
           aria-expanded={menuOpen}
           aria-haspopup="dialog"
           aria-controls="mobile-navigation"
-          onClick={() => setMenuOpen(true)}
+          onClick={() => setMenuOpen((value) => !value)}
         >
-          <Menu size={21} aria-hidden="true" />
+          <Menu size={21} aria-hidden="true" className="hamburger-icon" />
         </button>
         <nav
           className="navigation t-tabs desktop-navigation"

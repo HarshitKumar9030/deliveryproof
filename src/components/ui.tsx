@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useId, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useId, type ReactNode } from 'react';
 import { X, ArrowRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { statusLabels, type Project } from '@/demo/data';
@@ -102,7 +102,7 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     let timeout: ReturnType<typeof setTimeout> | undefined;

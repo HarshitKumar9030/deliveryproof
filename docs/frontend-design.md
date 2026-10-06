@@ -41,3 +41,7 @@ Copy is rewritten for DeliveryProof: payments, evidence counts, agreement/delive
 ## Adaptive summary-card experiment
 
 SummaryCards derives payments received, active projects, and attention counts from demo state. The cards use three columns on larger screens and stack as compact horizontal summaries on phones. On desktop, the opened card gains width while its content reveals smoothly; each card can expand to payment breakdowns, project statuses, or actionable issue links. Only one card expands at a time. Details retain visible counts, native buttons, aria-expanded/controls, inert collapsed content, keyboard activation, and visible focus. Reduced motion removes layout/reveal transitions. This adds responsive resizing without drag handles or fixed card dimensions.
+
+## Response workspace and navigation polish
+
+Response preparation uses a rounded main panel and a desktop summary rail showing selected source counts, evidence coverage, review state, and submission state. The rail stacks beneath the content on smaller screens; source actions wrap on phones. Step changes use a short opacity/translation reveal without blur. The desktop command palette is wider, with a distinct input surface and truncated long result descriptions. Dialog motion explicitly preserves transform/opacity transitions instead of allowing theme fades to replace them: 180ms open, 120ms close. Dialog setup runs before paint, and native focus restoration remains intact. The mobile hamburger rotates five degrees while expanded. Reduced motion disables these transitions.

@@ -120,190 +120,213 @@ export function ResponseBuilder({ project }: { project: Project }) {
           ),
         )}
       </ol>
-      <div
-        className="response-step-content panel-enter"
-        ref={contentRef}
-        tabIndex={-1}
-        key={step}
-      >
-        {step === 1 && (
-          <>
-            <div className="section-heading">
-              <h2>Start with the records.</h2>
-              <span className="caption">{sources.length} selected</span>
-            </div>
-            <p className="muted measure">
-              Choose the sources to include. Open any record to check exactly
-              what it says.
-            </p>
-            <div className="source-selection">
-              {project.evidence.map((source) => {
-                const Icon = evidenceIcons[source.kind];
-                return (
-                  <div className="select-source" key={source.id}>
-                    <label className="source-checkbox">
-                      <MotionCheckbox
-                        checked={selected.has(source.id)}
-                        onChange={(event) =>
-                          setSelected((value) => {
-                            const next = new Set(value);
-                            if (event.target.checked) next.add(source.id);
-                            else next.delete(source.id);
-                            return next;
-                          })
-                        }
-                      />
-                      <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-                      <span>
-                        <strong>{source.title}</strong>
-                        <small>
-                          {source.kind} · {source.date}
-                        </small>
-                      </span>
-                    </label>
-                    <button
-                      className="text-button source-preview-button"
-                      onClick={() => setPreview(source)}
-                    >
-                      View source
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="inline-attention compact">
-              <Info size={21} aria-hidden="true" />
-              <p>
-                {missingKinds.length
-                  ? `Missing from the selected records: ${missingKinds.join(', ')}. The draft will explicitly preserve these gaps.`
-                  : 'All key record types are selected. Still review the details before preparing a response.'}
+      <div className="response-workspace">
+        <div
+          className="response-step-content panel-enter"
+          ref={contentRef}
+          tabIndex={-1}
+          key={step}
+        >
+          {step === 1 && (
+            <>
+              <div className="section-heading">
+                <h2>Start with the records.</h2>
+                <span className="caption">{sources.length} selected</span>
+              </div>
+              <p className="muted measure">
+                Choose the sources to include. Open any record to check exactly
+                what it says.
               </p>
-            </div>
-            <div className="button-row">
-              <button
-                className="button primary"
-                disabled={!sources.length}
-                onClick={beginReview}
-              >
-                Review demo draft
-                <ArrowRight size={17} aria-hidden="true" />
-              </button>
-              <span className="caption">
-                Locally assembled from sample records.
-              </span>
-            </div>
-          </>
-        )}
-        {step === 2 && (
-          <>
-            <div className="section-heading">
-              <h2>Every claim deserves a source.</h2>
-              <span className="caption">Demo draft</span>
-            </div>
-            <p className="muted measure">
-              Check the wording and its references. You can edit the draft
-              before confirming your review.
-            </p>
-            <label className="draft-label">
-              Response draft
-              <textarea
-                className="response-draft"
-                rows={15}
-                value={draft}
-                onChange={(event) => {
-                  setDraft(event.target.value);
-                  setReviewed(false);
-                }}
-              />
-            </label>
-            <div className="citation-links" aria-label="Selected sources">
-              {sources.map((source) => (
+              <div className="source-selection">
+                {project.evidence.map((source) => {
+                  const Icon = evidenceIcons[source.kind];
+                  return (
+                    <div className="select-source" key={source.id}>
+                      <label className="source-checkbox">
+                        <MotionCheckbox
+                          checked={selected.has(source.id)}
+                          onChange={(event) =>
+                            setSelected((value) => {
+                              const next = new Set(value);
+                              if (event.target.checked) next.add(source.id);
+                              else next.delete(source.id);
+                              return next;
+                            })
+                          }
+                        />
+                        <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
+                        <span>
+                          <strong>{source.title}</strong>
+                          <small>
+                            {source.kind} · {source.date}
+                          </small>
+                        </span>
+                      </label>
+                      <button
+                        className="text-button source-preview-button"
+                        onClick={() => setPreview(source)}
+                      >
+                        View source
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="inline-attention compact">
+                <Info size={21} aria-hidden="true" />
+                <p>
+                  {missingKinds.length
+                    ? `Missing from the selected records: ${missingKinds.join(', ')}. The draft will explicitly preserve these gaps.`
+                    : 'All key record types are selected. Still review the details before preparing a response.'}
+                </p>
+              </div>
+              <div className="button-row">
                 <button
-                  className="citation-link"
-                  key={source.id}
-                  onClick={() => setPreview(source)}
+                  className="button primary"
+                  disabled={!sources.length}
+                  onClick={beginReview}
                 >
-                  {source.id.startsWith('DEMO-') ? source.kind : source.id}
+                  Review demo draft
+                  <ArrowRight size={17} aria-hidden="true" />
                 </button>
-              ))}
-            </div>
-            {unknownCitation && (
-              <p className="form-error" role="alert">
-                The draft references a source outside your selection. Correct
-                the reference before preparing the packet.
+                <span className="caption">
+                  Locally assembled from sample records.
+                </span>
+              </div>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <div className="section-heading">
+                <h2>Every claim deserves a source.</h2>
+                <span className="caption">Demo draft</span>
+              </div>
+              <p className="muted measure">
+                Check the wording and its references. You can edit the draft
+                before confirming your review.
               </p>
-            )}
-            <label className="review-confirmation">
-              <MotionCheckbox
-                checked={reviewed}
-                onChange={(event) => setReviewed(event.target.checked)}
-              />
-              <span>
-                I’ve reviewed the draft and its selected sources. I understand
-                this prepares a demo packet only.
+              <label className="draft-label">
+                Response draft
+                <textarea
+                  className="response-draft"
+                  rows={15}
+                  value={draft}
+                  onChange={(event) => {
+                    setDraft(event.target.value);
+                    setReviewed(false);
+                  }}
+                />
+              </label>
+              <div className="citation-links" aria-label="Selected sources">
+                {sources.map((source) => (
+                  <button
+                    className="citation-link"
+                    key={source.id}
+                    onClick={() => setPreview(source)}
+                  >
+                    {source.id.startsWith('DEMO-') ? source.kind : source.id}
+                  </button>
+                ))}
+              </div>
+              {unknownCitation && (
+                <p className="form-error" role="alert">
+                  The draft references a source outside your selection. Correct
+                  the reference before preparing the packet.
+                </p>
+              )}
+              <label className="review-confirmation">
+                <MotionCheckbox
+                  checked={reviewed}
+                  onChange={(event) => setReviewed(event.target.checked)}
+                />
+                <span>
+                  I’ve reviewed the draft and its selected sources. I understand
+                  this prepares a demo packet only.
+                </span>
+              </label>
+              <div className="button-row">
+                <button className="button secondary" onClick={() => setStep(1)}>
+                  <ArrowLeft size={17} aria-hidden="true" />
+                  Choose sources
+                </button>
+                <button
+                  className="button primary"
+                  disabled={!reviewed || !draft.trim() || unknownCitation}
+                  onClick={prepare}
+                >
+                  Prepare demo packet
+                  <ArrowRight size={17} aria-hidden="true" />
+                </button>
+              </div>
+            </>
+          )}
+          {step === 3 && (
+            <div className="packet-success">
+              <span className="success-icon">
+                <SuccessCheck size={46} />
               </span>
-            </label>
-            <div className="button-row">
-              <button className="button secondary" onClick={() => setStep(1)}>
-                <ArrowLeft size={17} aria-hidden="true" />
-                Choose sources
-              </button>
-              <button
-                className="button primary"
-                disabled={!reviewed || !draft.trim() || unknownCitation}
-                onClick={prepare}
-              >
-                Prepare demo packet
-                <ArrowRight size={17} aria-hidden="true" />
-              </button>
+              <h2>Your draft is ready.</h2>
+              <p>
+                Your reviewed wording and{' '}
+                {project.preparedPacket?.sources.length ?? sources.length} source
+                records are together in a demo packet. Nothing has been sent to
+                PayPal.
+              </p>
+              <div className="packet-meta">
+                <span>
+                  Format<strong>JSON demo packet</strong>
+                </span>
+                <span>
+                  Review<strong>Confirmed by you</strong>
+                </span>
+                <span>
+                  Submission<strong>Not submitted</strong>
+                </span>
+              </div>
+              <div className="button-row">
+                <button className="button primary" onClick={download}>
+                  <Download size={17} aria-hidden="true" />
+                  Download demo packet
+                </button>
+                <button
+                  className="button secondary"
+                  onClick={() => {
+                    setReviewed(false);
+                    setStep(2);
+                  }}
+                >
+                  Review again
+                </button>
+              </div>
+              <p className="caption">
+                The open case stays open. This demo packet is not a
+                submission-ready PDF.
+              </p>
             </div>
-          </>
-        )}
-        {step === 3 && (
-          <div className="packet-success">
-            <span className="success-icon">
-              <SuccessCheck size={46} />
-            </span>
-            <h2>Your draft is ready.</h2>
-            <p>
-              Your reviewed wording and{' '}
-              {project.preparedPacket?.sources.length ?? sources.length} source
-              records are together in a demo packet. Nothing has been sent to
-              PayPal.
-            </p>
-            <div className="packet-meta">
-              <span>
-                Format<strong>JSON demo packet</strong>
-              </span>
-              <span>
-                Review<strong>Confirmed by you</strong>
-              </span>
-              <span>
-                Submission<strong>Not submitted</strong>
-              </span>
-            </div>
-            <div className="button-row">
-              <button className="button primary" onClick={download}>
-                <Download size={17} aria-hidden="true" />
-                Download demo packet
-              </button>
-              <button
-                className="button secondary"
-                onClick={() => {
-                  setReviewed(false);
-                  setStep(2);
-                }}
-              >
-                Review again
-              </button>
-            </div>
-            <p className="caption">
-              The open case stays open. This demo packet is not a
-              submission-ready PDF.
-            </p>
-          </div>
-        )}
+          )}
+        </div>
+        <aside className="response-context" aria-label="Response summary">
+          <span className="workspace-eyebrow">RESPONSE WORKSPACE</span>
+          <h2>{step === 3 ? 'Packet prepared' : 'Build a clear response'}</h2>
+          <p>Keep the facts, their sources, and any gaps together.</p>
+          <dl className="response-context-stats">
+            <div><dt>Sources included</dt><dd>{sources.length} of {project.evidence.length}</dd></div>
+            <div><dt>Review</dt><dd>{step === 3 ? 'Confirmed' : reviewed ? 'Confirmed' : 'Pending'}</dd></div>
+            <div><dt>Submission</dt><dd>Not submitted</dd></div>
+          </dl>
+          <h3>Evidence coverage</h3>
+          <ul className="response-coverage">
+            {['Agreement', 'Payment', 'Delivery', 'Acknowledgement'].map((kind) => (
+              <li key={kind}>
+                {missingKinds.includes(kind) ? <Info size={15} aria-hidden="true" /> : <Check size={15} aria-hidden="true" />}
+                <span>{kind}</span>
+                <small>{missingKinds.includes(kind) ? 'Missing' : 'Included'}</small>
+              </li>
+            ))}
+          </ul>
+          <p className="response-context-note">Page access is a useful record. It does not establish client acceptance.</p>
+        </aside>
       </div>
       <SourcePreview source={preview} onClose={() => setPreview(null)} />
     </section>
