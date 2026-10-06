@@ -18,7 +18,7 @@ npm run dev
 PowerShell: use `Copy-Item .env.example .env` instead of `cp`.
 Frontend: `http://localhost:3000`. Open a project, record a demo payment/delivery/acknowledgement, or review Orbit Labs' dispute sources and download a reviewed JSON demo packet. Ctrl/⌘K opens project/command search; arrow keys, Enter, and Escape navigate it. Mobile navigation uses a hamburger menu. The light/dark choice persists in a one-year cookie and is rendered by the server to prevent an initial theme flash. Demo project changes survive client navigation and reset on refresh. New project URLs only exist for the current session.
 
-The UI uses Tailwind CSS v4, graphite/amber theme tokens, squircle surfaces, and reduced-motion-aware transitions. Summary cards adapt to screen width and expand into live demo breakdowns. SF Pro is preferred on systems where available. Windows currently renders self-hosted Inter as the explicit fallback; SF Pro is not installed or bundled. No decorative borders or shadows.
+The UI uses Tailwind CSS v4, graphite/amber theme tokens, squircle surfaces, and reduced-motion-aware transitions. Summary cards adapt to screen width and expand into live demo breakdowns. SF Pro is preferred on systems where available. Windows currently renders self-hosted Inter as the explicit fallback; SF Pro is not installed or bundled. Soft layered shadows provide depth on cards, dialogs, and primary controls.
 
 In another terminal, run `npm run dev:api` for the separate backend. Health endpoint: `http://localhost:3001/health`. No provider credentials are needed to start it or run mocked tests. `npm run build:api` compiles that service; `npm run build` builds the frontend. The Render Blueprint continues to describe the API service only.
 

@@ -19,6 +19,13 @@
     --shard-front: #a38e60;
     --shard-side: #766445;
     --shard-top: #d6c59e;
+    --card-shadow:
+      0 1px 3px #29282306, 0 8px 24px #29282308, inset 0 1px 0 #ffffff80;
+    --raised-shadow:
+      0 2px 5px #29282308, 0 14px 32px #2928230d, inset 0 1px 0 #ffffffa0;
+    --dialog-shadow: 0 8px 20px #29282314, 0 32px 80px #29282326;
+    --button-shadow:
+      0 1px 2px #17171520, 0 5px 12px #17171516, inset 0 1px 0 #ffffff26;
     @apply [background:var(--canvas)];
   }
   .theme-root[data-theme='dark'] {
@@ -40,6 +47,13 @@
     --shard-front: #b49a60;
     --shard-side: #7c693f;
     --shard-top: #e1ce9e;
+    --card-shadow:
+      0 1px 3px #00000024, 0 8px 24px #00000020, inset 0 1px 0 #ffffff06;
+    --raised-shadow:
+      0 2px 5px #00000030, 0 14px 32px #00000030, inset 0 1px 0 #ffffff0a;
+    --dialog-shadow: 0 8px 20px #00000045, 0 32px 80px #00000070;
+    --button-shadow:
+      0 1px 2px #00000040, 0 5px 12px #00000030, inset 0 1px 0 #ffffff35;
     @apply [background:var(--canvas)];
   }
   .app-shell {
@@ -426,6 +440,49 @@
   }
   .page-heading h1 {
     @apply [font-weight:550];
+  }
+  .theme-root,
+  .sidebar,
+  .command-trigger,
+  .metric-card,
+  .evidence-chart,
+  .dialog,
+  .bg-paper,
+  .mobile-menu-link {
+    transition:
+      background-color 320ms ease,
+      color 220ms ease,
+      box-shadow 280ms ease;
+  }
+  .metric-card,
+  .evidence-chart {
+    box-shadow: var(--card-shadow);
+  }
+  .metric-card[data-expanded='true'] {
+    box-shadow: var(--raised-shadow);
+  }
+  .dialog {
+    box-shadow: var(--dialog-shadow);
+  }
+  .icon-button.theme-toggle {
+    @apply bg-surface;
+    box-shadow: var(--card-shadow);
+  }
+  .button.primary,
+  .icon-button.theme-toggle {
+    box-shadow: var(--button-shadow);
+    transition:
+      transform 160ms var(--ease-smooth-out),
+      background-color 320ms ease,
+      color 220ms ease,
+      box-shadow 160ms ease;
+  }
+  .button.primary:active:not(:disabled),
+  .theme-toggle:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow:
+      0 1px 2px #00000020,
+      inset 0 1px 2px #00000010;
   }
   .mobile-menu-toggle {
     @apply hidden;

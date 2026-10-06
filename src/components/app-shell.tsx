@@ -139,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="toolbar flex items-center gap-3.5">
             <button
-              className="icon-button"
+              className="icon-button theme-toggle"
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
             >

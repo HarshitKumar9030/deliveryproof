@@ -1,6 +1,6 @@
 # DeliveryProof frontend
 
-The user-supplied analytics screenshot establishes the compact hierarchy: greeting, three metrics, chart and project list, and a narrow attention/activity rail. The final steering supersedes its colors: graphite and restrained amber, Apple-like typography and squircle corners, generous horizontal button padding, no decorative borders or shadows.
+The user-supplied analytics screenshot establishes the compact hierarchy: greeting, three metrics, chart and project list, and a narrow attention/activity rail. The final steering supersedes its colors: graphite and restrained amber, Apple-like typography and squircle corners, generous horizontal button padding, restrained layered shadows and minimal outlines.
 
 ## Design system
 
@@ -16,6 +16,8 @@ Buttons use 9px vertical/21px horizontal padding, 38px minimum height, 18px radi
 
 Hover feedback changes icon stroke color only. Interactive backgrounds remain fixed; icons do not rotate, shift, or scale on hover. Selection highlights remain for the active route and keyboard command selection. Press feedback, dialog transitions, and reduced-motion support are preserved.
 
+Cards use theme-specific layered shadows, with slightly more depth when expanded. Dialogs have broader soft shadows, and primary buttons and the theme switch have restrained depth. Surface colors fade over 320ms when the theme changes. Primary controls settle by 1px and scale to 0.98 while pressed; reduced motion removes these transitions.
+
 ## Tailwind implementation
 
 Tailwind v4 with @tailwindcss/postcss. globals.css is the single stylesheet entry, providing Tailwind theme tokens and the squircle utility. components.css and workspace-styles.css use Tailwind @apply for shared component patterns and responsive selectors. AppShell and Overview also use direct utility classes for composition. motion.css preserves the transition recipes; motion-integration.css handles their measured state and reduced-motion behavior. CSS custom properties retain theme switching and dynamic chart/progress dimensions.
@@ -29,9 +31,9 @@ Evidence chart bars show preserved record counts, not fabricated financial perfo
 ## Reference translation
 
 1. Hierarchy retains the screenshot's compact metrics, chart, project rows and side rail.
-2. Colors follow the user's later graphite/plum request rather than the screenshot's red accent.
+2. Colors follow the user's later graphite/amber request rather than the screenshot's red accent.
 3. Typography retains a small, quiet scale; Apple SF font preference is explicit and the Windows fallback is disclosed.
-4. Shapes use squircles and flat tonal separation rather than outlines/shadows.
+4. Shapes use squircles, tonal separation, and soft layered depth.
 5. Controls use wider horizontal padding, subtle hover/selection/dialog transitions and reduced-motion support.
 
 Copy is rewritten for DeliveryProof: payments, evidence counts, agreement/delivery/confirmation progress, and real demo issue labels replace social analytics and integration marketing. The chart shows 3/3/4/4 seed records. Initial payments total $8,450, three active projects, two attention items.
