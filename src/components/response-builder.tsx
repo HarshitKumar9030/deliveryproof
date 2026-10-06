@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ArrowRight, ArrowLeft, Check, Download, Info } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Download, Info, FileCheck2 } from 'lucide-react';
 import type { Project, Evidence } from '@/demo/data';
 import { useDemo } from '@/demo/demo-provider';
 import { evidenceIcons, SourcePreview } from './evidence-list';
@@ -31,9 +31,14 @@ export function ResponseBuilder({ project }: { project: Project }) {
       ),
   );
   const [draft, setDraft] = useState(project.preparedPacket?.draft ?? '');
+  const [draftSources, setDraftSources] = useState(
+    () => project.preparedPacket?.sources.map((source) => source.id).sort().join('|') ?? '',
+  );
   const [reviewed, setReviewed] = useState(false);
   const [preview, setPreview] = useState<Evidence | null>(null);
   const sources = project.evidence.filter((source) => selected.has(source.id));
+  const selectionKey = sources.map((source) => source.id).sort().join('|');
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
   const citationIds = Array.from(
     draft.matchAll(/\[([^\]]+)\]/g),
     (match) => match[1],
@@ -47,9 +52,12 @@ export function ResponseBuilder({ project }: { project: Project }) {
   ].filter((kind) => !sources.some((source) => source.kind === kind));
 
   function beginReview() {
-    setDraft(
+    if (!draft.trim() || draftSources !== selectionKey) {
+      setDraft(
       `Demo response for ${project.client}\n\nThe following selected records describe the project:\n\n${sources.map((source) => `${source.excerpt} [${source.id}]`).join('\n\n')}\n\n${missingKinds.length ? `Evidence gaps: ${missingKinds.join(', ')}. These gaps remain unresolved.\n\n` : ''}These records should be assessed together. Page access alone does not prove acceptance. This is a demo draft for human review, not a finding about the dispute.`,
-    );
+      );
+      setDraftSources(selectionKey);
+    }
     setReviewed(false);
     setStep(2);
   }
@@ -100,6 +108,14 @@ export function ResponseBuilder({ project }: { project: Project }) {
   }
   return (
     <section className="response-builder">
+      <div className="response-intro">
+        <div>
+          <span className="workspace-eyebrow">DISPUTE RESPONSE</span>
+          <h2>A clear record. A considered response.</h2>
+          <p>Choose the evidence, review the wording, then keep everything together.</p>
+        </div>
+        <span className="response-demo-tag"><FileCheck2 size={15} aria-hidden="true" /> Demo workspace</span>
+      </div>
       <ol className="response-steps" aria-label="Response preparation steps">
         {['Choose sources', 'Review draft', 'Prepare packet'].map(
           (label, index) => (
@@ -115,7 +131,10 @@ export function ResponseBuilder({ project }: { project: Project }) {
                   index + 1
                 )}
               </span>
-              {label}
+              <div className="response-step-label">
+                <strong>{label}</strong>
+                <small>{['Gather the facts', 'Check every claim', 'Keep a reviewed copy'][index]}</small>
+              </div>
             </li>
           ),
         )}
@@ -137,11 +156,18 @@ export function ResponseBuilder({ project }: { project: Project }) {
                 Choose the sources to include. Open any record to check exactly
                 what it says.
               </p>
+              <div className="source-list-toolbar">
+                <span>{project.evidence.length} preserved records</span>
+                <button className="text-button" onClick={() => {
+                  setSelected(selected.size === project.evidence.length ? new Set() : new Set(project.evidence.map((source) => source.id)));
+                  setReviewed(false);
+                }}>{selected.size === project.evidence.length ? 'Clear selection' : 'Select all'}</button>
+              </div>
               <div className="source-selection">
                 {project.evidence.map((source) => {
                   const Icon = evidenceIcons[source.kind];
                   return (
-                    <div className="select-source" key={source.id}>
+                    <div className="select-source" data-selected={selected.has(source.id)} key={source.id}>
                       <label className="source-checkbox">
                         <MotionCheckbox
                           checked={selected.has(source.id)}
@@ -162,6 +188,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                           </small>
                         </span>
                       </label>
+                      <p className="source-card-excerpt">{source.excerpt}</p>
                       <button
                         className="text-button source-preview-button"
                         onClick={() => setPreview(source)}
@@ -181,7 +208,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                     : 'All key record types are selected. Still review the details before preparing a response.'}
                 </p>
               </div>
-              <div className="button-row">
+              <div className="button-row response-actions">
                 <button
                   className="button primary"
                   disabled={!sources.length}
@@ -218,6 +245,10 @@ export function ResponseBuilder({ project }: { project: Project }) {
                   }}
                 />
               </label>
+              <div className="draft-editor-meta">
+                <span>{wordCount} words · {sources.length} selected sources</span>
+                <span>{unknownCitation ? 'Check source references' : 'References match selected sources'}</span>
+              </div>
               <div className="citation-links" aria-label="Selected sources">
                 {sources.map((source) => (
                   <button
@@ -245,7 +276,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                   this prepares a demo packet only.
                 </span>
               </label>
-              <div className="button-row">
+              <div className="button-row response-actions">
                 <button className="button secondary" onClick={() => setStep(1)}>
                   <ArrowLeft size={17} aria-hidden="true" />
                   Choose sources
@@ -316,6 +347,11 @@ export function ResponseBuilder({ project }: { project: Project }) {
             <div><dt>Submission</dt><dd>Not submitted</dd></div>
           </dl>
           <h3>Evidence coverage</h3>
+          <div className="coverage-track" aria-hidden="true">
+            {['Agreement', 'Payment', 'Delivery', 'Acknowledgement'].map((kind) => (
+              <span key={kind} data-covered={!missingKinds.includes(kind)} />
+            ))}
+          </div>
           <ul className="response-coverage">
             {['Agreement', 'Payment', 'Delivery', 'Acknowledgement'].map((kind) => (
               <li key={kind}>
@@ -325,6 +361,16 @@ export function ResponseBuilder({ project }: { project: Project }) {
               </li>
             ))}
           </ul>
+          {step === 2 && (
+            <div className="review-source-index">
+              <h3>Inspect a reference</h3>
+              {sources.map((source) => (
+                <button key={source.id} onClick={() => setPreview(source)}>
+                  <span>{source.id}</span><strong>{source.title}</strong><ArrowRight size={13} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          )}
           <p className="response-context-note">Page access is a useful record. It does not establish client acceptance.</p>
         </aside>
       </div>

@@ -12,6 +12,7 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-selected: var(--selected);
+  --color-selected-control: var(--selected-control);
   --font-sans:
     'SF Pro Text', 'SF Pro', -apple-system, BlinkMacSystemFont,
     var(--font-fallback), sans-serif;
