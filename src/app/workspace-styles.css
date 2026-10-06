@@ -16,49 +16,62 @@
     --accent-soft: #e7dcec;
     --toast: #302438;
     --toast-text: #f8f5fa;
+    --glass: linear-gradient(145deg, #ffffffa6, #ffffff33 55%, #b795cb26);
+    --shard-front: #9474a8;
+    --shard-side: #6b4c82;
+    --shard-top: #c8b0dc;
     @apply [background:var(--canvas)];
   }
   .theme-root[data-theme='dark'] {
-    --canvas: #1c1821;
-    --sidebar: #211c27;
-    --paper: #28222f;
-    --surface: #312939;
-    --surface-hover: #3b3144;
-    --text: #f0eaf4;
-    --muted: #b0a3b9;
-    --selected: #44364f;
-    --selected-control: #594863;
-    --accent: #cfb5df;
-    --accent-button: #c3a3d6;
-    --accent-hover: #d6bae7;
-    --accent-soft: #44314f;
+    --canvas: #151219;
+    --sidebar: #1c1822;
+    --paper: #221d2a;
+    --surface: #2d2536;
+    --surface-hover: #393042;
+    --text: #f4eef9;
+    --muted: #b8aabe;
+    --selected: #3b2e49;
+    --selected-control: #52415f;
+    --accent: #d4b4ed;
+    --accent-button: #c4a2e0;
+    --accent-hover: #ddc0f2;
+    --accent-soft: #3a284d;
     --toast: #e8d9f0;
     --toast-text: #302438;
+    --glass: linear-gradient(145deg, #ffffff1c, #ffffff06 55%, #b18adf21);
+    --shard-front: #a681ce;
+    --shard-side: #735095;
+    --shard-top: #dbc0f6;
     @apply [background:var(--canvas)];
   }
   .app-shell {
-    @apply [grid-template-columns:180px_minmax(0,_1fr)];
+    @apply [grid-template-columns:260px_minmax(0,_1fr)];
   }
   .sidebar {
-    @apply [width:180px] [padding:28px_12px_24px] [background:transparent];
+    @apply [width:260px] [padding:28px_16px_24px] [background:var(--sidebar)];
   }
   .brand {
     @apply [font-size:14px] [gap:8px] [padding:0_8px];
   }
   .brand-icon {
-    @apply [color:var(--text)];
+    @apply grid place-items-center size-9 rounded-[14px] [color:var(--accent)];
+    corner-shape: squircle;
+    background: var(--glass);
+    backdrop-filter: blur(12px) saturate(140%);
   }
   .brand-icon svg {
     @apply [width:20px];
   }
   .command-trigger {
     @apply [margin:32px_2px_26px] [background:var(--surface)];
+    background: var(--glass);
+    backdrop-filter: blur(12px) saturate(140%);
   }
   .command-trigger span {
-    @apply [font-size:10px];
+    @apply [font-size:11px] min-w-0;
   }
   .command-trigger kbd {
-    @apply [font-size:9px];
+    @apply [font-size:10px] shrink-0 [padding:3px_6px];
   }
   .nav-item {
     @apply [font-size:12px];
@@ -134,13 +147,27 @@
     @apply [font-size:11px] [color:var(--muted)];
   }
   .evidence-bar-track {
-    @apply [width:min(100%,_55px)] [flex:1] flex [align-items:end];
+    @apply [width:min(100%,_42px)] [flex:1] flex [align-items:end];
   }
   .evidence-bar-track > span {
-    @apply block [width:100%] [border-radius:4px_4px_0_0] [background:linear-gradient(to_top,_var(--selected-control),_var(--accent))];
-    transition:
-      filter 180ms,
-      height 300ms;
+    @apply block w-full bg-transparent;
+    transition: height 300ms;
+  }
+  .evidence-shard svg {
+    @apply block size-full;
+  }
+  .shard-front {
+    fill: var(--shard-front);
+  }
+  .shard-side {
+    fill: var(--shard-side);
+  }
+  .shard-top {
+    fill: var(--shard-top);
+  }
+  .shard-glint {
+    fill: white;
+    opacity: 0.18;
   }
   .evidence-bar-group:hover .evidence-bar-track > span {
     @apply [filter:brightness(1.35)];
@@ -172,6 +199,8 @@
   }
   .attention-icon {
     @apply [width:25px] [height:25px] [color:var(--accent)] [background:var(--accent-soft)] [border-radius:5px];
+    background: var(--glass);
+    backdrop-filter: blur(12px) saturate(140%);
   }
   .attention-icon svg {
     @apply [width:14px] [height:14px];
@@ -318,6 +347,13 @@
   }
   .page-heading h1 {
     @apply [font-weight:550];
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .brand-icon,
+    .command-trigger,
+    .attention-icon {
+      @apply bg-surface;
+    }
   }
   .icon-button,
   .button,

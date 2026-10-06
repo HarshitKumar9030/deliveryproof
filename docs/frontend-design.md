@@ -4,7 +4,9 @@ The user-supplied analytics screenshot establishes the compact hierarchy: greeti
 
 ## Design system
 
-Light: canvas #f0eef2, paper #faf9fb, surface #e6e1e9, ink #2c2630, muted #756b7b, accent #725580. Dark: canvas #1c1821, paper #28222f, ink #f0eaf4, muted #b0a3b9, accent #cfb5df. No red glow, blue, or sage in the active theme. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.
+Light: canvas #f0eef2, paper #faf9fb, surface #e6e1e9, ink #2c2630, muted #756b7b, accent #725580. Dark: canvas #151219, paper #221d2a, ink #f4eef9, muted #b8aabe, accent #d4b4ed. No red glow, blue, or sage in the active theme. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.
+
+Desktop sidebar is 260px wide, with space for the full search label and Ctrl K shortcut. Mobile retains the compact top navigation. The brand badge, search control, and attention icons use a static translucent gradient and 12px backdrop blur with a flat-color fallback. Hover backgrounds remain fixed. Evidence bars use narrow faceted SVG shards with visible counts and accessible project/count labels; heights still derive from preserved record counts.
 
 Buttons use 9px vertical/21px horizontal padding, 38px minimum height, 18px radius and CSS corner-shape: squircle. Panels use 28px squircle corners; dialogs use 32px and are centered horizontally and vertically, with a scrollable height limit on small screens. Browsers without corner-shape support retain rounded corners. Native focus outlines remain.
 

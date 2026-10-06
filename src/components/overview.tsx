@@ -108,10 +108,34 @@ export function Overview() {
                   <span className="bar-count">{project.evidence.length}</span>
                   <div className="evidence-bar-track">
                     <span
+                      className="evidence-shard"
                       style={{
                         height: `${Math.min((project.evidence.length / Math.max(5, ...projects.map((p) => p.evidence.length))) * 100, 100)}%`,
                       }}
-                    />
+                    >
+                      <svg
+                        viewBox="0 0 100 120"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <polygon
+                          className="shard-front"
+                          points="0,28 60,40 60,120 0,104"
+                        />
+                        <polygon
+                          className="shard-side"
+                          points="60,40 100,24 100,100 60,120"
+                        />
+                        <polygon
+                          className="shard-top"
+                          points="0,28 60,0 100,24 60,40"
+                        />
+                        <polygon
+                          className="shard-glint"
+                          points="5,33 12,35 12,102 5,100"
+                        />
+                      </svg>
+                    </span>
                   </div>
                   <span className="bar-label">
                     {project.client.split(' ')[0]}

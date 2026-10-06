@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
     )?.label ?? 'Workspace';
   return (
-    <div className="app-shell flex min-h-dvh flex-col min-[761px]:grid min-[761px]:grid-cols-[180px_minmax(0,1fr)]">
+    <div className="app-shell flex min-h-dvh flex-col min-[761px]:grid min-[761px]:grid-cols-[260px_minmax(0,1fr)]">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
