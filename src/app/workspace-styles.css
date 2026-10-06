@@ -499,11 +499,27 @@
   .dialog.t-modal.is-closing {
     transition-duration: var(--modal-close-dur);
   }
-  .mobile-menu-toggle .hamburger-icon {
-    transition: transform 180ms var(--ease-smooth-out), color 150ms ease-out;
+  .navigation-glyph .navigation-line {
+    transform-box: view-box;
+    transition: transform 180ms var(--ease-smooth-out), opacity 120ms ease-out;
   }
-  .mobile-menu-toggle[aria-expanded='true'] .hamburger-icon {
-    transform: rotate(5deg);
+  .navigation-line-top { transform-origin: 12px 6px; }
+  .navigation-line-middle { transform-origin: 12px 12px; }
+  .navigation-line-bottom { transform-origin: 12px 18px; }
+  .navigation-glyph[data-open='true'] .navigation-line-top {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .navigation-glyph[data-open='true'] .navigation-line-middle {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  .navigation-glyph[data-open='true'] .navigation-line-bottom {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+  .mobile-menu:not(.is-open) .navigation-glyph .navigation-line {
+    transform: none;
+    opacity: 1;
+    transition-duration: 120ms;
   }
   .mobile-menu .dialog-heading .icon-button {
     @apply bg-surface;

@@ -92,6 +92,7 @@ export function Dialog({
   children,
   className = '',
   onClosed,
+  closeIcon,
 }: {
   open: boolean;
   onClose: () => void;
@@ -99,6 +100,7 @@ export function Dialog({
   children: ReactNode;
   className?: string;
   onClosed?: () => void;
+  closeIcon?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -159,7 +161,7 @@ export function Dialog({
           aria-label="Close dialog"
           onClick={onClose}
         >
-          <X size={20} />
+          {closeIcon ?? <X size={20} />}
         </button>
       </div>
       {children}

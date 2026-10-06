@@ -13,13 +13,13 @@ import {
   Building2,
   Plus,
   Search,
-  Menu,
 } from 'lucide-react';
 import { useDemo } from '@/demo/demo-provider';
 import { NewProjectDialog } from './new-project-dialog';
 import { SlidingPill, Toast } from './motion';
 import { CommandPalette } from './command-palette';
 import { Dialog } from './ui';
+import { NavigationGlyph } from './navigation-glyph';
 const navigation = [
   { href: '/', label: 'Overview', icon: House },
   { href: '/projects', label: 'Projects', icon: Folder },
@@ -93,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           aria-controls="mobile-navigation"
           onClick={() => setMenuOpen((value) => !value)}
         >
-          <Menu size={21} aria-hidden="true" className="hamburger-icon" />
+          <NavigationGlyph open={menuOpen} />
         </button>
         <nav
           className="navigation t-tabs desktop-navigation"
@@ -179,6 +179,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         onClose={() => setMenuOpen(false)}
         title="Workspace"
         className="mobile-menu"
+        closeIcon={<NavigationGlyph open={menuOpen} />}
       >
         <nav
           id="mobile-navigation"
