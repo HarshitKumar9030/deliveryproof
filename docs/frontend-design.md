@@ -1,12 +1,12 @@
 # DeliveryProof frontend
 
-The user-supplied analytics screenshot establishes the compact hierarchy: greeting, three metrics, chart and project list, and a narrow attention/activity rail. The final steering supersedes its colors: graphite and muted plum, Apple-like typography and squircle corners, generous horizontal button padding, no decorative borders or shadows.
+The user-supplied analytics screenshot establishes the compact hierarchy: greeting, three metrics, chart and project list, and a narrow attention/activity rail. The final steering supersedes its colors: graphite and restrained amber, Apple-like typography and squircle corners, generous horizontal button padding, no decorative borders or shadows.
 
 ## Design system
 
-Light: canvas #f0eef2, paper #faf9fb, surface #e6e1e9, ink #2c2630, muted #756b7b, accent #725580. Dark: canvas #151219, paper #221d2a, ink #f4eef9, muted #b8aabe, accent #d4b4ed. No red glow, blue, or sage in the active theme. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.
+Light: canvas #f3f2ee, paper #fdfcf9, surface #e7e5df, ink #292823, muted #716e64, accent #85672d. Dark: canvas #171715, paper #24241f, ink #f4f2e9, muted #b4b1a4, accent #d8be82. No purple tint or liquid-glass treatments remain. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.
 
-Desktop sidebar is 260px wide, with space for the full search label and Ctrl K shortcut. Mobile retains the compact top navigation. The brand badge, search control, and attention icons use a static translucent gradient and 12px backdrop blur with a flat-color fallback. Hover backgrounds remain fixed. Evidence bars use narrow faceted SVG shards with visible counts and accessible project/count labels; heights still derive from preserved record counts.
+Desktop sidebar is 260px wide, with space for the full search label and Ctrl K shortcut. Mobile retains the compact top navigation. The logo is an unboxed line icon; search and attention icons use plain solid surfaces. Backdrop filters and glass gradients have been removed. Hover backgrounds remain fixed. Evidence bars use narrow faceted SVG shards with visible counts and accessible project/count labels; heights still derive from preserved record counts.
 
 Mobile navigation is accessed through a hamburger button with expanded state and a centered native dialog; route selection closes it, Escape restores trigger focus, and resizing to desktop dismisses it. Theme preference is persisted in a one-year SameSite=Lax cookie, validated by the server layout, and passed into the client provider before hydration. Missing/invalid preferences default to light. These pages render per request to honor the preference.
 
@@ -35,3 +35,7 @@ Evidence chart bars show preserved record counts, not fabricated financial perfo
 5. Controls use wider horizontal padding, subtle hover/selection/dialog transitions and reduced-motion support.
 
 Copy is rewritten for DeliveryProof: payments, evidence counts, agreement/delivery/confirmation progress, and real demo issue labels replace social analytics and integration marketing. The chart shows 3/3/4/4 seed records. Initial payments total $8,450, three active projects, two attention items.
+
+## Adaptive summary-card experiment
+
+SummaryCards derives payments received, active projects, and attention counts from demo state. The cards use three columns on larger screens and stack as compact horizontal summaries on phones. On desktop, the opened card gains width while its content reveals smoothly; each card can expand to payment breakdowns, project statuses, or actionable issue links. Only one card expands at a time. Details retain visible counts, native buttons, aria-expanded/controls, inert collapsed content, keyboard activation, and visible focus. Reduced motion removes layout/reveal transitions. This adds responsive resizing without drag handles or fixed card dimensions.

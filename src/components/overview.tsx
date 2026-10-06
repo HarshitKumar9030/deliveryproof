@@ -11,9 +11,9 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { useDemo } from '@/demo/demo-provider';
-import { money, needsAttention, type EvidenceKind } from '@/demo/data';
+import { money, type EvidenceKind } from '@/demo/data';
 import { ProjectList } from './project-list';
-import { AnimatedValue } from './motion';
+import { SummaryCards } from './summary-cards';
 
 const icons: Record<EvidenceKind, typeof FileText> = {
   Agreement: FileText,
@@ -56,34 +56,7 @@ export function Overview() {
         </div>
         <span className="date caption">Oct 6, 2026</span>
       </div>
-      <dl className="summary-strip">
-        <div>
-          <dt>Payments received</dt>
-          <dd>
-            <AnimatedValue
-              value={money(
-                projects
-                  .filter((p) => p.paid)
-                  .reduce((sum, p) => sum + p.amount, 0),
-              )}
-            />
-          </dd>
-        </div>
-        <div>
-          <dt>Active projects</dt>
-          <dd>
-            <AnimatedValue
-              value={projects.filter((p) => p.status !== 'complete').length}
-            />
-          </dd>
-        </div>
-        <div>
-          <dt>Need attention</dt>
-          <dd>
-            <AnimatedValue value={projects.filter(needsAttention).length} />
-          </dd>
-        </div>
-      </dl>
+      <SummaryCards />
       <div className="grid items-start gap-[18px] min-[1001px]:grid-cols-[minmax(0,1fr)_270px] min-[1001px]:max-[1150px]:grid-cols-[minmax(0,1fr)_230px]">
         <div className="min-w-0">
           <section className="evidence-chart" aria-label="Evidence coverage">
