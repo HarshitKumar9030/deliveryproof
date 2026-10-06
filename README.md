@@ -16,7 +16,7 @@ npm run dev
 ```
 
 PowerShell: use `Copy-Item .env.example .env` instead of `cp`.
-Frontend: `http://localhost:3000`. Open a project, record a demo payment/delivery/acknowledgement, or review Orbit Labs' dispute sources and download a reviewed JSON demo packet. Ctrl/⌘K opens project/command search; arrow keys, Enter, and Escape navigate it. Attention filtering, source previews, and light/dark themes work locally. Changes survive client navigation and reset on refresh. New project URLs only exist for the current session.
+Frontend: `http://localhost:3000`. Open a project, record a demo payment/delivery/acknowledgement, or review Orbit Labs' dispute sources and download a reviewed JSON demo packet. Ctrl/⌘K opens project/command search; arrow keys, Enter, and Escape navigate it. Mobile navigation uses a hamburger menu. The light/dark choice persists in a one-year cookie and is rendered by the server to prevent an initial theme flash. Demo project changes survive client navigation and reset on refresh. New project URLs only exist for the current session.
 
 The UI uses Tailwind CSS v4, graphite/plum theme tokens, squircle surfaces, and reduced-motion-aware transitions. SF Pro is preferred on systems where available. Windows currently renders self-hosted Inter as the explicit fallback; SF Pro is not installed or bundled. No decorative borders or shadows.
 

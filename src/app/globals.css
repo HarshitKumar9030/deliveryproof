@@ -19,6 +19,16 @@
 @utility squircle {
   corner-shape: squircle;
 }
+@property --edge-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes dp-border-orbit {
+  to {
+    --edge-angle: 360deg;
+  }
+}
 @layer base {
   :root {
     font-family: var(--font-sans);

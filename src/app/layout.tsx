@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { cookies } from 'next/headers';
 import { DemoProvider } from '@/demo/demo-provider';
 import { AppShell } from '@/components/app-shell';
 import './globals.css';
@@ -13,13 +14,15 @@ export const metadata: Metadata = {
   description:
     'A demo workspace for clear digital deliveries and reviewed dispute evidence.',
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const preference = (await cookies()).get('deliveryproof-theme')?.value;
+  const initialTheme = preference === 'dark' ? 'dark' : 'light';
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <DemoProvider>
+        <DemoProvider initialTheme={initialTheme}>
           <AppShell>{children}</AppShell>
         </DemoProvider>
       </body>

@@ -99,7 +99,7 @@ export function NewProjectDialog({
           <button className="button secondary" type="button" onClick={onClose}>
             Cancel
           </button>
-          <button className="button primary" type="submit">
+          <button className="button primary gradient-edge" type="submit">
             Create project
           </button>
         </div>

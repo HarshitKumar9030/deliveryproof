@@ -70,12 +70,23 @@ type DemoContextValue = State & {
   ) => void;
 };
 const DemoContext = createContext<DemoContextValue | null>(null);
-export function DemoProvider({ children }: { children: ReactNode }) {
+export function DemoProvider({
+  children,
+  initialTheme = 'light',
+}: {
+  children: ReactNode;
+  initialTheme?: 'light' | 'dark';
+}) {
   const [state, dispatch] = useReducer(reducer, {
     projects: initialProjects,
     activity: initialActivity,
   });
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme);
+  function toggleTheme() {
+    const next = theme === 'light' ? 'dark' : 'light';
+    document.cookie = `deliveryproof-theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    setTheme(next);
+  }
   const [notice, notify] = useState('');
   useEffect(() => {
     if (!notice) return;
@@ -144,8 +155,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         theme,
-        toggleTheme: () =>
-          setTheme((value) => (value === 'light' ? 'dark' : 'light')),
+        toggleTheme,
         notice,
         notify,
         createProject,

@@ -13,11 +13,13 @@ import {
   Building2,
   Plus,
   Search,
+  Menu,
 } from 'lucide-react';
 import { useDemo } from '@/demo/demo-provider';
 import { NewProjectDialog } from './new-project-dialog';
 import { SlidingPill, Toast } from './motion';
 import { CommandPalette } from './command-palette';
+import { Dialog } from './ui';
 const navigation = [
   { href: '/', label: 'Overview', icon: House },
   { href: '/projects', label: 'Projects', icon: Folder },
@@ -33,6 +35,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [creating, setCreating] = useState(false);
   const [searching, setSearching] = useState(false);
   const [queuedCreate, setQueuedCreate] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 761px)');
+    const close = () => {
+      if (desktop.matches) setMenuOpen(false);
+    };
+    desktop.addEventListener('change', close);
+    return () => desktop.removeEventListener('change', close);
+  }, []);
   useEffect(() => {
     const handle = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -74,7 +85,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           <kbd>Ctrl K</kbd>
         </button>
         <p className="nav-section-label">Workspace</p>
-        <nav className="navigation t-tabs" aria-label="Main navigation">
+        <button
+          className="icon-button mobile-menu-toggle"
+          aria-label="Open navigation menu"
+          aria-expanded={menuOpen}
+          aria-haspopup="dialog"
+          aria-controls="mobile-navigation"
+          onClick={() => setMenuOpen(true)}
+        >
+          <Menu size={21} aria-hidden="true" />
+        </button>
+        <nav
+          className="navigation t-tabs desktop-navigation"
+          aria-label="Main navigation"
+        >
           <SlidingPill value={current} />
           {navigation.map(({ href, label, icon: Icon }) => {
             const active =
@@ -133,7 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </button>
             <button
-              className="button primary"
+              className="button primary gradient-edge"
               onClick={() => setCreating(true)}
             >
               <Plus size={17} className="mobile-plus" aria-hidden="true" />
@@ -150,6 +174,39 @@ export function AppShell({ children }: { children: ReactNode }) {
           Demo data only. Nothing is sent to PayPal.
         </footer>
       </div>
+      <Dialog
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        title="Workspace"
+        className="mobile-menu"
+      >
+        <nav
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
+          className="grid gap-2 py-3"
+        >
+          {navigation.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="mobile-menu-link flex items-center gap-3 rounded-2xl px-5 py-3 text-sm text-muted"
+              aria-current={
+                (href === '/' ? pathname === '/' : pathname.startsWith(href))
+                  ? 'page'
+                  : undefined
+              }
+              onClick={() => setMenuOpen(false)}
+            >
+              <Icon size={19} aria-hidden="true" />
+              <span>{label}</span>
+              {href === '/disputes' && openCases > 0 && (
+                <span className="ml-auto text-xs">{openCases}</span>
+              )}
+            </Link>
+          ))}
+        </nav>
+        <p className="caption">Demo workspace · Alex Morgan</p>
+      </Dialog>
       <NewProjectDialog open={creating} onClose={() => setCreating(false)} />
       <CommandPalette
         open={searching}

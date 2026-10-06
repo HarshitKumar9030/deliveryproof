@@ -8,6 +8,10 @@ Light: canvas #f0eef2, paper #faf9fb, surface #e6e1e9, ink #2c2630, muted #756b7
 
 Desktop sidebar is 260px wide, with space for the full search label and Ctrl K shortcut. Mobile retains the compact top navigation. The brand badge, search control, and attention icons use a static translucent gradient and 12px backdrop blur with a flat-color fallback. Hover backgrounds remain fixed. Evidence bars use narrow faceted SVG shards with visible counts and accessible project/count labels; heights still derive from preserved record counts.
 
+Mobile navigation is accessed through a hamburger button with expanded state and a centered native dialog; route selection closes it, Escape restores trigger focus, and resizing to desktop dismisses it. Theme preference is persisted in a one-year SameSite=Lax cookie, validated by the server layout, and passed into the client provider before hydration. Missing/invalid preferences default to light. These pages render per request to honor the preference.
+
+New project and Create project use a masked, partial conic-gradient edge. Only the border angle animates over seven seconds; the icon and button background stay fixed. Reduced motion keeps the edge static.
+
 Buttons use 9px vertical/21px horizontal padding, 38px minimum height, 18px radius and CSS corner-shape: squircle. Panels use 28px squircle corners; dialogs use 32px and are centered horizontally and vertically, with a scrollable height limit on small screens. Browsers without corner-shape support retain rounded corners. Native focus outlines remain.
 
 Hover feedback changes icon stroke color only. Interactive backgrounds remain fixed; icons do not rotate, shift, or scale on hover. Selection highlights remain for the active route and keyboard command selection. Press feedback, dialog transitions, and reduced-motion support are preserved.

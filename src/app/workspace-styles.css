@@ -348,6 +348,37 @@
   .page-heading h1 {
     @apply [font-weight:550];
   }
+  .mobile-menu-toggle {
+    @apply hidden;
+  }
+  .mobile-menu-link[aria-current='page'] {
+    @apply bg-selected text-ink;
+  }
+  .gradient-edge {
+    @apply relative isolate;
+  }
+  .gradient-edge::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    padding: 1.5px;
+    border-radius: inherit;
+    corner-shape: inherit;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--edge-angle),
+      transparent 0deg 180deg,
+      #b58bdc 220deg,
+      #f4deff 270deg,
+      #b58bdc 320deg,
+      transparent 360deg
+    );
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: dp-border-orbit 7s linear infinite;
+  }
   @supports not (backdrop-filter: blur(1px)) {
     .brand-icon,
     .command-trigger,
@@ -437,12 +468,21 @@
     }
     .sidebar {
       @apply [width:100%] [padding:18px_20px_12px];
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+    }
+    .sidebar .desktop-navigation {
+      @apply hidden;
+    }
+    .mobile-menu-toggle {
+      @apply grid size-11;
     }
     .brand {
       @apply [font-size:15px] [padding:0];
     }
     .command-trigger {
       @apply [margin:0];
+      @apply size-11 justify-center p-0;
     }
     .main-shell {
       @apply [padding:0_20px];
@@ -482,6 +522,19 @@
     }
   }
   @media (max-width: 480px) {
+    .sidebar {
+      @apply px-4 gap-1.5;
+    }
+    .brand {
+      @apply text-[13px];
+    }
+    .brand-icon {
+      @apply size-8;
+    }
+    .breadcrumb > span:first-child,
+    .breadcrumb > span:nth-child(2) {
+      @apply hidden;
+    }
     .dashboard-rail {
       @apply [grid-template-columns:1fr] [gap:25px];
     }
