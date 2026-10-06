@@ -17,6 +17,6 @@ export function integrationStatus(env: NodeJS.ProcessEnv) {
     paypal: configured('PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET'),
     paypalWebhooks: configured('PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_WEBHOOK_ID'),
     elastic: configured('ELASTIC_URL', 'ELASTIC_API_KEY'),
-    ai: configured('OPENAI_API_KEY', 'OPENAI_MODEL'),
+    ai: configured('GEMINI_API_KEY', 'GEMINI_MODEL'),
   };
 }

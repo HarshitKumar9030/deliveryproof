@@ -1,5 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 import { required } from '../config.js';
 import { PayPalService } from './paypal/paypal.service.js';
 import { ElasticEvidenceService } from './elastic/elastic.service.js';
@@ -14,8 +14,8 @@ export function createServices(env: NodeJS.ProcessEnv = process.env) {
     elastic: () => new ElasticEvidenceService(new Client({
       node: required(env, 'ELASTIC_URL'), auth: { apiKey: required(env, 'ELASTIC_API_KEY') },
     }), env.ELASTIC_INDEX || 'deliveryproof-evidence'),
-    ai: () => new AiEvidenceService(new OpenAI({ apiKey: required(env, 'OPENAI_API_KEY'),
-      timeout: 60_000, maxRetries: 1 }), required(env, 'OPENAI_MODEL')),
+    ai: () => new AiEvidenceService(new GoogleGenAI({ apiKey: required(env, 'GEMINI_API_KEY'),
+      httpOptions: { timeout: 60_000 } }), required(env, 'GEMINI_MODEL')),
     storage: () => new LocalEvidenceStorage(env.EVIDENCE_STORAGE_DIR || '.data/evidence'),
   };
 }

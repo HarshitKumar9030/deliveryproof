@@ -4,7 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Client } from '@elastic/elasticsearch';
-import type OpenAI from 'openai';
+import type { GoogleGenAI } from '@google/genai';
 import { createServices } from '../src/services/registry.js';
 import { PayPalService } from '../src/services/paypal/paypal.service.js';
 import { ElasticEvidenceService } from '../src/services/elastic/elastic.service.js';
@@ -22,7 +22,7 @@ test('missing credentials fail lazily, without fake provider results', () => {
   const services = createServices({});
   assert.throws(() => services.paypal(), /PAYPAL_CLIENT_ID/);
   assert.throws(() => services.elastic(), /ELASTIC_URL/);
-  assert.throws(() => services.ai(), /OPENAI_API_KEY/);
+  assert.throws(() => services.ai(), /GEMINI_API_KEY/);
   assert.ok(services.storage());
 });
 
@@ -105,16 +105,40 @@ test('Elastic rejects a provider result from another project', async () => {
 });
 
 test('AI rejects mixed-project evidence before calling model', async () => {
-  const client = { responses: { parse: async () => { throw new Error('Unexpected model call'); } } } as unknown as OpenAI;
+  const client = { models: { generateContent: async () => { throw new Error('Unexpected model call'); } } } as unknown as GoogleGenAI;
   await assert.rejects(() => new AiEvidenceService(client, 'configured-model').analyse(scope, 'not received',
     [{ ...record, ownerId: 'someone-else' }]), /scope mismatch/);
 });
 
 test('AI rejects invented citations returned by a model', async () => {
-  const client = { responses: { parse: async () => ({ output_parsed: {
+  const client = { models: { generateContent: async () => ({ text: JSON.stringify({
     summary: 'Draft', findings: [{ statement: 'Delivered', evidenceIds: ['invented'] }], missingEvidence: [],
-  } }) } } as unknown as OpenAI;
+  }) }) } } as unknown as GoogleGenAI;
   await assert.rejects(() => new AiEvidenceService(client, 'configured-model').analyse(scope, 'not received', [record]), /Unknown evidence citation/);
+});
+
+test('Gemini uses the configured model and structured schema, then validates its evidence', async () => {
+  let request: any;
+  const analysis = { summary: 'Access recorded', findings: [{ statement: 'Access recorded', evidenceIds: [record.id] }], missingEvidence: [] };
+  const client = { models: { generateContent: async (input: unknown) => {
+    request = input;
+    return { text: JSON.stringify(analysis) };
+  } } } as unknown as GoogleGenAI;
+  const result = await new AiEvidenceService(client, 'chosen-gemini-model').analyse(scope, 'not received', [record]);
+  assert.deepEqual(result, analysis);
+  assert.equal(request.model, 'chosen-gemini-model');
+  assert.equal(request.config.responseMimeType, 'application/json');
+  assert.equal(request.config.responseJsonSchema.type, 'object');
+  assert.equal(JSON.parse(request.contents).evidence[0].id, record.id);
+  assert.ok(request.config.abortSignal instanceof AbortSignal);
+});
+
+test('Gemini empty or malformed output fails without leaking response content', async () => {
+  for (const text of [undefined, '', '   ', 'sensitive invalid provider output']) {
+    const client = { models: { generateContent: async () => ({ text }) } } as unknown as GoogleGenAI;
+    await assert.rejects(() => new AiEvidenceService(client, 'configured-model').analyse(scope, 'not received', [record]),
+      text?.trim() ? /Gemini returned invalid JSON/ : /Gemini returned no structured analysis/);
+  }
 });
 
 test('empty citations are rejected; known citations are accepted', () => {

@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | PayPal | `src/services/paypal/` | Sandbox OAuth, create/capture order, read dispute, verify webhook via PayPal, multipart PDF evidence transport |
 | Elastic | `src/services/elastic/` | Index mapping, scoped indexing and lexical search; vector search is a later enhancement |
-| AI / OpenAI | `src/services/ai/` | Responses structured output, scope checks, citation-ID validation; configurable model |
+| AI / Gemini | `src/services/ai/` | Google GenAI structured JSON output, scope checks, citation-ID validation; configurable model |
 | File storage | `src/services/storage/` | Local content-addressed originals; no overwrite; integrity-checked reads |
 | AG Grid / AG Studio | `src/services/dashboard/` | Browser-safe row and column contracts using AG Grid types. Rendered grid, Studio widgets and agent framework are not implemented yet |
 | Render | `render.yaml`, `src/services/jobs/` | Undeployed web-service Blueprint; durable job and webhook repository interfaces. Queue / Workflows adapter not implemented |
@@ -24,7 +24,7 @@ No startup call connects to a provider or creates an Elastic index.
 
 - **PayPal:** use a sandbox REST application from the developer dashboard. Configure a real webhook ID when implementing the event route. No live-mode toggle exists.
 - **Elastic:** set `ELASTIC_URL`, `ELASTIC_API_KEY`, and optionally `ELASTIC_INDEX`. `ensureIndex()` explicitly creates an index when invoked. Use API keys restricted to the evidence index.
-- **AI:** set `OPENAI_API_KEY` and `OPENAI_MODEL` to an available model supporting Responses structured outputs. No model is hardcoded. Evidence is sent to the provider only when `analyse()` is called; `store: false` requests no stored Response. This does not override provider retention policies.
+- **AI:** set `GEMINI_API_KEY` from Google AI Studio and `GEMINI_MODEL` to an available Gemini model supporting structured JSON output. No model is hardcoded. The Google GenAI SDK calls `models.generateContent()` with a JSON schema derived from Zod; returned JSON is validated locally and unknown evidence citations are rejected. Empty/blocked output and malformed JSON fail explicitly. Evidence is sent to Google only when `analyse()` is called; Google's data-use and retention terms apply to the account/tier used.
 - **Storage:** `.data/evidence` is ignored by Git. The caller must authenticate the user before constructing a scope. File paths are never accepted from users; reads use an owner/project plus SHA-256 hash.
 - **Render:** the Blueprint has placeholders for secrets, not credentials. It is not deployed. Local disk is not a production evidence store.
 
@@ -66,6 +66,6 @@ Zapier (correspondence ingestion), Bryntum (deadline timelines), KERNEL (authori
 - [PayPal dispute evidence](https://developer.paypal.com/platforms/disputes/handle-disputes/use-disputes-api/)
 - [PayPal webhook verification](https://developer.paypal.com/api/rest/webhooks/rest/)
 - [Elastic JavaScript client](https://www.elastic.co/docs/reference/elasticsearch/clients/javascript/getting-started)
-- [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
+- [Gemini structured outputs](https://ai.google.dev/gemini-api/docs/generate-content/structured-output)
 - [Render Blueprints](https://render.com/docs/blueprint-spec)
 - [AG Studio hackathon resources](https://paypalaihackathon.devpost.com/details/aggrid)
