@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "DeliveryProof service checks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{base_url}}/health" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Health is OK', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Sandbox OAuth",
+      "request": {
+        "method": "POST", "url": "{{paypal_url}}/v1/oauth2/token",
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "{{client_id}}", "type": "string" },
+          { "key": "password", "value": "{{client_secret}}", "type": "string" }
+        ] },
+        "body": { "mode": "urlencoded", "urlencoded": [{ "key": "grant_type", "value": "client_credentials" }] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('OAuth succeeded', () => pm.response.to.have.status(200));",
+        "if (pm.response.code === 200) pm.environment.set('access_token', pm.response.json().access_token);"
+      ] } }]
+    },
+    {
+      "name": "Create sandbox order",
+      "request": {
+        "method": "POST", "url": "{{paypal_url}}/v2/checkout/orders",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "PayPal-Request-Id", "value": "{{create_request_id}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"intent\":\"CAPTURE\",\"purchase_units\":[{\"custom_id\":\"{{project_id}}\",\"amount\":{\"currency_code\":\"{{currency}}\",\"value\":\"{{amount}}\"}}]}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Order accepted', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+        "if ([200, 201].includes(pm.response.code)) pm.environment.set('order_id', pm.response.json().id);"
+      ] } }]
+    },
+    {
+      "name": "Capture approved sandbox order",
+      "request": {
+        "method": "POST", "url": "{{paypal_url}}/v2/checkout/orders/{{order_id}}/capture",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "PayPal-Request-Id", "value": "{{capture_request_id}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "Read sandbox dispute",
+      "request": {
+        "method": "GET", "url": "{{paypal_url}}/v1/customer/disputes/{{dispute_id}}",
+        "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }]
+      }
+    }
+  ]
+}

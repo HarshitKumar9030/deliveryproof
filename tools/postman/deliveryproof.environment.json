@@ -1,0 +1,18 @@
+{
+  "name": "DeliveryProof local + PayPal sandbox",
+  "values": [
+    { "key": "base_url", "value": "http://localhost:3001", "enabled": true },
+    { "key": "paypal_url", "value": "https://api-m.sandbox.paypal.com", "enabled": true },
+    { "key": "client_id", "value": "", "enabled": true },
+    { "key": "client_secret", "value": "", "type": "secret", "enabled": true },
+    { "key": "access_token", "value": "", "type": "secret", "enabled": true },
+    { "key": "project_id", "value": "project-001", "enabled": true },
+    { "key": "currency", "value": "USD", "enabled": true },
+    { "key": "amount", "value": "500.00", "enabled": true },
+    { "key": "create_request_id", "value": "", "enabled": true },
+    { "key": "capture_request_id", "value": "", "enabled": true },
+    { "key": "order_id", "value": "", "enabled": true },
+    { "key": "dispute_id", "value": "", "enabled": true }
+  ],
+  "_postman_variable_scope": "environment"
+}
