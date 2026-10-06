@@ -4,6 +4,8 @@ The user-supplied analytics screenshot establishes the compact hierarchy: greeti
 
 ## Design system
 
+Canvas accents add a finite 1.1-second particle sweep to the statistics plot and a small orbit around the confirmation ring. They replay on metric changes, entry, or pointer entry with a cooldown. The canvases are decorative, hidden from accessibility, and pass pointer input through to real chart links. Resolution is capped at 1.5 device pixels per CSS pixel. Intersection, document visibility, reduced motion, and unmount cleanup stop drawing; there is no idle animation loop. These effects do not depict additional financial data.
+
 The overview statistics panel switches between preserved record counts and received demo payments. Both views derive values directly from project state; shard links open evidence or project details. Faceted SVG bars reveal through per-instance clip paths with a short stagger, and the acknowledgement ring draws to the actual confirmed-project fraction. Initial totals are 14 records, $8,450 received, and 1 of 4 projects with an acknowledgement (25%). Animations run once on entry/metric change, require no canvas loop or animation library, and are disabled for reduced motion. Mobile cards adapt without horizontal page overflow.
 
 Light: canvas #f3f2ee, paper #fdfcf9, surface #e7e5df, ink #292823, muted #716e64, accent #85672d. Dark: canvas #171715, paper #24241f, ink #f4f2e9, muted #b4b1a4, accent #d8be82. No purple tint or liquid-glass treatments remain. Heading 26px; body 12–14px; metrics 29px; control labels 12px. SF Pro Text/Display where available, then native Apple system fonts, then self-hosted Inter. SF Pro is absent on the current Windows host and is not represented as an embedded font.

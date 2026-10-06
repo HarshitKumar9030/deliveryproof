@@ -1,4 +1,16 @@
 @layer components {
+  .canvas-accent {
+    @apply absolute inset-0 size-full pointer-events-none;
+  }
+  .canvas-accent-sweep {
+    @apply z-[1];
+  }
+  .canvas-accent-orbit {
+    @apply -inset-3 [width:calc(100%+24px)] [height:calc(100%+24px)];
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .canvas-accent { @apply hidden; }
+  }
   .statistics-chart {
     @apply min-w-0 rounded-[28px] bg-paper p-7 mb-7;
     corner-shape: squircle;

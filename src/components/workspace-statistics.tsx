@@ -4,6 +4,7 @@ import { useId, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { BarChart3, CreditCard, ArrowUpRight } from 'lucide-react';
 import { money, type Project } from '@/demo/data';
+import { CanvasAccent } from './canvas-accent';
 
 export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
   const [view, setView] = useState<'records' | 'payments'>('records');
@@ -29,6 +30,7 @@ export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
         <span>{view === 'records' ? 'preserved records' : 'received · USD'}</span>
       </div>
       <div className="statistics-plot" key={`${view}-${values.join('-')}`}>
+        <CanvasAccent replayKey={view} />
         <div className="statistics-gridlines" aria-hidden="true"><span /><span /><span /></div>
         <div className="statistics-columns">
           {projects.map((project, index) => {
@@ -66,6 +68,7 @@ export function ConfirmationStatistics({ projects }: { projects: Project[] }) {
   return (
     <section className="confirmation-statistics" aria-label="Client confirmations">
       <div className="confirmation-ring">
+        <CanvasAccent variant="orbit" replayKey={`${confirmed}-${projects.length}`} />
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <circle className="confirmation-ring-track" cx="50" cy="50" r="42" />
           <circle key={`${confirmed}-${projects.length}`} className="confirmation-ring-fill" cx="50" cy="50" r="42" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - ratio * 100} style={{ '--ring-offset': 100 - ratio * 100 } as CSSProperties} />
