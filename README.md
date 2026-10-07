@@ -29,3 +29,21 @@ Never commit credentials or customer evidence. Provider adapters fail explicitly
 See [services](docs/services.md) for integration status, setup, and limitations. Commit verified milestones with `git add <files>` and `git commit -m "<change>"` from this folder. GitHub origin is configured; no deployment is configured yet.
 
 See [frontend design](docs/frontend-design.md) for the UI system. Gemini analysis is wired to a single-workspace development access gate. Multi-user authentication, durable storage/queue, real delivery events, PDF packet generation, and reviewed PayPal submission remain future integration work. The demo packet is JSON for inspecting the sample flow, not a PayPal-ready PDF.
+# Local product infrastructure
+
+Run `npm run setup:local` to add missing local configuration without replacing existing secrets.
+Run `npm run db:local` in a separate terminal. This downloads MongoDB on first use, binds it to
+127.0.0.1:27017, and keeps its WiredTiger database in `.data/mongodb` between restarts. It is a
+development launcher; use a managed MongoDB URI for hosting. Do not run it alongside another
+MongoDB process on port 27017.
+
+Create a development account in an interactive terminal with
+`npm run account:create -- you@example.com`. The generated password is printed there once;
+only a salted scrypt hash is stored. Auth.js sign-in is available at `/api/auth/signin`.
+
+Add `UPLOADTHING_TOKEN` to `.env.local` from your UploadThing app dashboard. Upload credentials
+stay on the server. The upload endpoint requires an authenticated user and a project owned by
+that user. Authenticated upload metadata is persisted after UploadThing's verified callback.
+
+These infrastructure routes are the first product migration step. The existing dashboard still
+uses demo state until its project flows are connected to the persistent repository.

@@ -16,7 +16,9 @@
     "start:api": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run build:api && npm run build"
+    "check": "npm run typecheck && npm test && npm run build:api && npm run build",
+    "db:local": "node tools/mongo-local.mjs",
+    "account:create": "node tools/create-account.mjs"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.5.1",
@@ -24,9 +26,13 @@
     "ag-grid-community": "36.2.0",
     "dotenv": "18.0.5",
     "lucide-react": "1.52.0",
+    "mongodb": "^7.7.0",
     "next": "16.3.8",
+    "next-auth": "^5.0.0-beta.32",
+    "pdf-lib": "^1.17.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "uploadthing": "^7.7.4",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -34,9 +40,13 @@
     "@types/node": "26.6.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "mongodb-memory-server": "^11.3.0",
     "postcss": "^8.5.29",
     "tailwindcss": "^4.3.3",
     "tsx": "4.23.15",
     "typescript": "7.0.2"
+  },
+  "overrides": {
+    "effect": "3.20.0"
   }
 }
