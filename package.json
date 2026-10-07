@@ -18,7 +18,8 @@
     "test": "tsx --test tests/*.test.ts",
     "check": "npm run typecheck && npm test && npm run build:api && npm run build",
     "db:local": "node tools/mongo-local.mjs",
-    "account:create": "node tools/create-account.mjs"
+    "account:create": "node tools/create-account.mjs",
+    "test:product": "node tools/verify-product.mjs"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.5.1",

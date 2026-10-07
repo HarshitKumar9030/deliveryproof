@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useDemo } from '@/demo/demo-provider';
+import { useWorkspace } from '@/components/workspace-provider';
 
 /** Finite decorative motion: no data is drawn here and no idle animation loop runs. */
 export function CanvasAccent({ variant = 'sweep', replayKey = '' }: {
@@ -9,7 +9,7 @@ export function CanvasAccent({ variant = 'sweep', replayKey = '' }: {
   replayKey?: string;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { theme } = useDemo();
+  const { theme } = useWorkspace();
   useEffect(() => {
     const canvas = ref.current;
     const context = canvas?.getContext('2d');

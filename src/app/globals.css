@@ -4,6 +4,8 @@
 @import './motion-integration.css' layer(components);
 @import './workspace-styles.css';
 @import './statistics.css';
+@import './auth.css';
+@import './landing.css';
 
 @theme inline {
   --color-canvas: var(--canvas);

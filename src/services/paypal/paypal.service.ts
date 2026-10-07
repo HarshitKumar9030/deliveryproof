@@ -50,14 +50,24 @@ export class PayPalService {
     return response.status === 204 ? undefined : response.json();
   }
 
-  async createOrder(input: { projectId: string; currency: string; value: string; requestId: string }) {
+  async createOrder(input: { projectId: string; currency: string; value: string; requestId: string; returnUrl?: string; cancelUrl?: string }) {
     const money = MoneySchema.parse(input);
     z.string().min(1).max(127).parse(input.projectId);
     return OrderSchema.parse(await this.request('/v2/checkout/orders', 'POST', {
       intent: 'CAPTURE', purchase_units: [{ custom_id: input.projectId,
         amount: { currency_code: money.currency, value: money.value } }],
+      ...(input.returnUrl && input.cancelUrl ? { payment_source: { paypal: { experience_context: {
+        return_url: z.url().parse(input.returnUrl), cancel_url: z.url().parse(input.cancelUrl),
+        user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING',
+      } } } } : {}),
     }, input.requestId));
   }
+
+  async getOrder(orderId: string) {
+    return OrderSchema.parse(await this.request(`/v2/checkout/orders/${encodeURIComponent(orderId)}`));
+  }
+
+  async checkConnection() { await this.accessToken(); }
 
   async captureOrder(orderId: string, requestId: string) {
     return OrderSchema.parse(await this.request(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, 'POST', {}, requestId));

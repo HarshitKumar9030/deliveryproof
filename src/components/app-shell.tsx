@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import {
   FileCheck2,
@@ -8,27 +9,29 @@ import {
   Folder,
   Files,
   ShieldCheck,
+  UserRound,
   Moon,
   Sun,
   Building2,
   Plus,
   Search,
 } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
+import { useWorkspace } from '@/components/workspace-provider';
 import { NewProjectDialog } from './new-project-dialog';
 import { SlidingPill, Toast } from './motion';
 import { CommandPalette } from './command-palette';
 import { Dialog } from './ui';
 import { NavigationGlyph } from './navigation-glyph';
 const navigation = [
-  { href: '/', label: 'Overview', icon: House },
+  { href: '/dashboard', label: 'Overview', icon: House },
   { href: '/projects', label: 'Projects', icon: Folder },
   { href: '/deliveries', label: 'Deliveries', icon: Files },
   { href: '/disputes', label: 'Disputes', icon: ShieldCheck },
+  { href: '/account', label: 'Account', icon: UserRound },
 ];
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { theme, toggleTheme, notice, projects } = useDemo();
+  const { theme, toggleTheme, notice, projects, user } = useWorkspace();
   const openCases = projects.filter(
     (project) => project.status === 'dispute',
   ).length;
@@ -61,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [creating]);
   const current =
     navigation.find((item) =>
-      item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
+      item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href),
     )?.label ?? 'Workspace';
   return (
     <div className="app-shell flex min-h-dvh flex-col min-[761px]:grid min-[761px]:grid-cols-[260px_minmax(0,1fr)]">
@@ -69,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <aside className="sidebar">
-        <Link href="/" className="brand" aria-label="DeliveryProof home">
+        <Link href="/dashboard" className="brand" aria-label="DeliveryProof home">
           <span className="brand-icon">
             <FileCheck2 size={21} strokeWidth={1.7} />
           </span>
@@ -102,7 +105,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SlidingPill value={current} />
           {navigation.map(({ href, label, icon: Icon }) => {
             const active =
-              href === '/' ? pathname === '/' : pathname.startsWith(href);
+              href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
             return (
               <Link
                 key={href}
@@ -122,11 +125,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="sidebar-bottom">
           <div className="workspace-label">
             <Building2 size={21} strokeWidth={1.7} />
-            <span>Demo workspace</span>
+            <span>Your workspace</span>
           </div>
           <div className="account">
-            <span className="avatar">AM</span>
-            <span>Alex Morgan</span>
+            <span className="avatar">{user?.name.slice(0,2).toUpperCase()}</span>
+            <span>{user?.name}</span><button className="text-button" onClick={() => signOut({ callbackUrl: '/signin' })}>Sign out</button>
           </div>
         </div>
       </aside>
@@ -171,7 +174,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </main>
         <footer className="app-footer">
-          Demo data only. Nothing is sent to PayPal.
+          Your records are saved to your account. Responses require your review.
         </footer>
       </div>
       <Dialog
@@ -192,7 +195,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               href={href}
               className="mobile-menu-link flex items-center gap-3 rounded-2xl px-5 py-3 text-sm text-muted"
               aria-current={
-                (href === '/' ? pathname === '/' : pathname.startsWith(href))
+                (href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href))
                   ? 'page'
                   : undefined
               }
@@ -206,7 +209,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <p className="caption">Demo workspace · Alex Morgan</p>
+        <p className="caption">{user?.email}</p>
       </Dialog>
       <NewProjectDialog open={creating} onClose={() => setCreating(false)} />
       <CommandPalette

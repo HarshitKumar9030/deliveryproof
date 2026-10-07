@@ -2,14 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { ArrowRight, ArrowLeft, Check, Download, Info, FileCheck2 } from 'lucide-react';
-import type { Project, Evidence } from '@/demo/data';
-import { useDemo } from '@/demo/demo-provider';
+import type { Project, Evidence } from '@/domain/projects';
+import { useWorkspace } from '@/components/workspace-provider';
 import { evidenceIcons, SourcePreview } from './evidence-list';
 import { MotionCheckbox, SuccessCheck } from './motion';
 import { GeminiReview } from './gemini-review';
 
 export function ResponseBuilder({ project }: { project: Project }) {
-  const { updateProject, notify } = useDemo();
+  const { updateProject, notify } = useWorkspace();
   const [step, setStep] = useState(project.preparedPacket ? 3 : 1);
   const contentRef = useRef<HTMLDivElement>(null);
   const previousStep = useRef(step);
@@ -36,6 +36,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
     () => project.preparedPacket?.sources.map((source) => source.id).sort().join('|') ?? '',
   );
   const [reviewed, setReviewed] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState<Evidence | null>(null);
   const sources = project.evidence.filter((source) => selected.has(source.id));
   const selectionKey = sources.map((source) => source.id).sort().join('|');
@@ -55,17 +56,18 @@ export function ResponseBuilder({ project }: { project: Project }) {
   function beginReview() {
     if (!draft.trim() || draftSources !== selectionKey) {
       setDraft(
-      `Demo response for ${project.client}\n\nThe following selected records describe the project:\n\n${sources.map((source) => `${source.excerpt} [${source.id}]`).join('\n\n')}\n\n${missingKinds.length ? `Evidence gaps: ${missingKinds.join(', ')}. These gaps remain unresolved.\n\n` : ''}These records should be assessed together. Page access alone does not prove acceptance. This is a demo draft for human review, not a finding about the dispute.`,
+      `Response for ${project.client}\n\nThe following selected records describe the project:\n\n${sources.map((source) => `${source.excerpt} [${source.id}]`).join('\n\n')}\n\n${missingKinds.length ? `Evidence gaps: ${missingKinds.join(', ')}. These gaps remain unresolved.\n\n` : ''}These records should be assessed together. Page access alone does not prove acceptance. This is a draft for human review, not a finding about the dispute.`,
       );
       setDraftSources(selectionKey);
     }
     setReviewed(false);
     setStep(2);
   }
-  function prepare() {
-    if (!reviewed || !draft.trim() || unknownCitation || !sources.length)
+  async function prepare() {
+    if (saving || !reviewed || !draft.trim() || unknownCitation || !sources.length)
       return;
-    updateProject(
+    setSaving(true);
+    try { await updateProject(
       project.id,
       {
         responsePrepared: true,
@@ -75,10 +77,13 @@ export function ResponseBuilder({ project }: { project: Project }) {
           reviewedAt: new Date().toISOString(),
         },
       },
-      'Demo response prepared',
-    );
+      'Response prepared',
+    ); } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not save reviewed packet');
+      return;
+    } finally { setSaving(false); }
     setStep(3);
-    notify('Reviewed demo packet prepared. Nothing was submitted.');
+    notify('Reviewed packet prepared. Nothing was submitted.');
   }
   function download() {
     const packet = project.preparedPacket;
@@ -87,7 +92,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
       [
         JSON.stringify(
           {
-            demo: true,
+
             submitted: false,
             projectId: project.id,
             client: project.client,
@@ -102,20 +107,20 @@ export function ResponseBuilder({ project }: { project: Project }) {
     const url = URL.createObjectURL(file);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `deliveryproof-${project.id}-demo.json`;
+    anchor.download = `deliveryproof-${project.id}.json`;
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    notify('Demo JSON packet downloaded.');
+    notify('JSON packet downloaded.');
   }
   return (
     <section className="response-builder">
       <div className="response-intro">
         <div>
-          <span className="workspace-eyebrow">DISPUTE RESPONSE</span>
+          <span className="workspace-eyebrow">{project.status === 'dispute' ? 'DISPUTE RESPONSE' : 'EVIDENCE REVIEW'}</span>
           <h2>A clear record. A considered response.</h2>
           <p>Choose the evidence, review the wording, then keep everything together.</p>
         </div>
-        <span className="response-demo-tag"><FileCheck2 size={15} aria-hidden="true" /> Demo workspace</span>
+        <span className="response-workspace-tag"><FileCheck2 size={15} aria-hidden="true" /> Your workspace</span>
       </div>
       <ol className="response-steps" aria-label="Response preparation steps">
         {['Choose sources', 'Review draft', 'Prepare packet'].map(
@@ -215,7 +220,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                   disabled={!sources.length}
                   onClick={beginReview}
                 >
-                  Review demo draft
+                  Review draft
                   <ArrowRight size={17} aria-hidden="true" />
                 </button>
                 <span className="caption">
@@ -234,7 +239,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
             <>
               <div className="section-heading">
                 <h2>Every claim deserves a source.</h2>
-                <span className="caption">Demo draft</span>
+                <span className="caption">Draft</span>
               </div>
               <p className="muted measure">
                 Check the wording and its references. You can edit the draft
@@ -263,7 +268,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                     key={source.id}
                     onClick={() => setPreview(source)}
                   >
-                    {source.id.startsWith('DEMO-') ? source.kind : source.id}
+                    {source.id}
                   </button>
                 ))}
               </div>
@@ -280,7 +285,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                 />
                 <span>
                   I’ve reviewed the draft and its selected sources. I understand
-                  this prepares a demo packet only.
+                  this prepares a reviewed packet only.
                 </span>
               </label>
               <div className="button-row response-actions">
@@ -290,10 +295,10 @@ export function ResponseBuilder({ project }: { project: Project }) {
                 </button>
                 <button
                   className="button primary"
-                  disabled={!reviewed || !draft.trim() || unknownCitation}
+                  disabled={saving || !reviewed || !draft.trim() || unknownCitation}
                   onClick={prepare}
                 >
-                  Prepare demo packet
+                  {saving ? 'Saving packet…' : 'Prepare reviewed packet'}
                   <ArrowRight size={17} aria-hidden="true" />
                 </button>
               </div>
@@ -308,12 +313,12 @@ export function ResponseBuilder({ project }: { project: Project }) {
               <p>
                 Your reviewed wording and{' '}
                 {project.preparedPacket?.sources.length ?? sources.length} source
-                records are together in a demo packet. Nothing has been sent to
+                records are together in a reviewed packet. Nothing has been sent to
                 PayPal.
               </p>
               <div className="packet-meta">
                 <span>
-                  Format<strong>JSON demo packet</strong>
+                  Format<strong>JSON reviewed packet</strong>
                 </span>
                 <span>
                   Review<strong>Confirmed by you</strong>
@@ -325,7 +330,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
               <div className="button-row">
                 <button className="button primary" onClick={download}>
                   <Download size={17} aria-hidden="true" />
-                  Download demo packet
+                  Download reviewed packet
                 </button>
                 <button
                   className="button secondary"
@@ -338,7 +343,7 @@ export function ResponseBuilder({ project }: { project: Project }) {
                 </button>
               </div>
               <p className="caption">
-                The open case stays open. This demo packet is not a
+                The open case stays open. This reviewed packet is not a
                 submission-ready PDF.
               </p>
             </div>

@@ -15,8 +15,6 @@ for (const [key, value] of Object.entries({
   APP_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
   MONGODB_URI: 'mongodb://127.0.0.1:27017/deliveryproof',
   UPLOADTHING_TOKEN: '',
-  WORKSPACE_PASSWORD: randomBytes(24).toString('base64url'),
-  WORKSPACE_SESSION_SECRET: randomBytes(32).toString('hex'),
   GEMINI_API_KEY: '', GEMINI_MODEL: '',
 })) {
   if (!new RegExp(`^${key}=`, 'm').test(contents) && !inherited[key]?.trim()) contents += `\n${key}=${value}\n`;

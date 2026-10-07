@@ -10,12 +10,12 @@ import {
   Plus,
   Minus,
 } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
-import { money, needsAttention, statusLabels } from '@/demo/data';
+import { useWorkspace } from '@/components/workspace-provider';
+import { money, needsAttention, statusLabels } from '@/domain/projects';
 import { AnimatedValue } from './motion';
 
 export function SummaryCards() {
-  const { projects } = useDemo();
+  const { projects } = useWorkspace();
   const [expanded, setExpanded] = useState<string | null>(null);
   const id = useId();
   const paid = projects.filter((project) => project.paid);

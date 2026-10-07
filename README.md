@@ -1,49 +1,162 @@
 # DeliveryProof
 
-Preserve proof of digital work, identify delivery gaps, and prepare reviewed PayPal dispute evidence.
+**You delivered the work. Keep the proof.**
 
-Standalone repository on `main`, connected to GitHub. Includes a Next.js demo frontend and the separate service foundation. Projects use synthetic, in-memory data. Browsing requires no provider credentials; optional authenticated evidence analysis makes a real server-side Gemini call when explicitly requested.
+Built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/).
+DeliveryProof gives freelancers and small studios a record of what was agreed, what was paid,
+and what was handed over—then helps them review that evidence when a delivery is questioned.
 
-## Local setup
+## The problem
 
-Requires Node.js 22+ and npm.
+A PayPal capture proves a payment happened. It does not explain the scope of a design project,
+where the final files went, or whether the client acknowledged receipt. Those details often live
+in different tools. Reconstructing the story during a dispute is slow, and a plausible AI-written
+response can make things worse if it introduces facts the seller cannot support.
 
-```sh
-npm ci
+DeliveryProof keeps those records separate and connected. A seller-saved link is labelled as a
+seller record. A PayPal payment is recorded only after the server verifies a completed capture.
+Missing acknowledgement remains missing.
+
+## What PayPal and AI actually do
+
+**PayPal is the payment source of truth.** Each seller connects their own sandbox REST app.
+DeliveryProof creates an Orders v2 order for the stored project amount and produces a client
+payment link. The client approves in PayPal, then completes the capture. The server checks the
+order, project reference, USD amount, capture status, and capture ID before marking the project paid.
+Request IDs are saved before provider calls so retries reuse the same operation.
+
+**Gemini checks selected evidence.** It returns structured findings with source IDs and a list of
+gaps. The server loads records belonging to the signed-in account and rejects unknown citations.
+The reviewer checks the wording and prepares a JSON packet containing the draft and original
+source snapshots. Valid citations still need human review; they do not guarantee factual accuracy.
+
+This is a sandbox prototype, not a dispute adjudicator. It does not promise Seller Protection,
+a winning outcome, live settlement, or automatic submission to PayPal.
+
+## Run it
+
+Requirements: Node.js 22 or later, npm, and a PayPal Developer sandbox app.
+
+```powershell
+npm install
 npm run setup:local
-cp .env.example .env
-npm run check
+npm run db:local
+```
+
+Keep MongoDB running, then start the app in a second terminal:
+
+```powershell
 npm run dev
 ```
 
-PowerShell: use `Copy-Item .env.example .env` instead of `cp`.
-For Gemini analysis, follow [credential setup](docs/credentials.md), fill in `.env.local`, and restart the development server.
-Frontend: `http://localhost:3000`. Open a project, record a demo payment/delivery/acknowledgement, or review Orbit Labs' dispute sources and download a reviewed JSON demo packet. Ctrl/⌘K opens project/command search; arrow keys, Enter, and Escape navigate it. Mobile navigation uses a hamburger menu. The light/dark choice persists in a one-year cookie and is rendered by the server to prevent an initial theme flash. Demo project changes survive client navigation and reset on refresh. New project URLs only exist for the current session.
+Open http://localhost:3000. The local MongoDB launcher downloads its binary on first use, binds
+to 127.0.0.1:27017, and preserves WiredTiger data in `.data/mongodb`. Use a managed MongoDB URI
+for hosting. Do not run another MongoDB process on the same port.
 
-The UI uses Tailwind CSS v4, graphite/amber theme tokens, squircle surfaces, and reduced-motion-aware transitions. Summary cards adapt to screen width and expand into live demo breakdowns. SF Pro is preferred on systems where available. Windows currently renders self-hosted Inter as the explicit fallback; SF Pro is not installed or bundled. Soft layered shadows provide depth on cards, dialogs, and primary controls.
+`setup:local` adds missing values to `.env.local` and preserves existing ones. Configure:
 
-In another terminal, run `npm run dev:api` for the separate backend. Health endpoint: `http://localhost:3001/health`. No provider credentials are needed to start it or run mocked tests. `npm run build:api` compiles that service; `npm run build` builds the frontend. The Render Blueprint continues to describe the API service only.
+| Setting | Purpose |
+| --- | --- |
+| `MONGODB_URI` | Local connection is generated; use Atlas for a hosted build |
+| `AUTH_SECRET` | Generated locally; signs Auth.js sessions |
+| `APP_ENCRYPTION_KEY` | Generated locally; encrypts seller PayPal credentials; keep it stable |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Google AI Studio key and a model supporting structured JSON |
+| `APP_ORIGIN` | Public app origin when hosted, including scheme |
+| `UPLOADTHING_TOKEN` | Enables the authenticated upload server endpoint |
+| `ELASTIC_URL`, `ELASTIC_API_KEY` | Configures the evidence-search adapter; automatic indexing is not wired yet |
 
-Never commit credentials or customer evidence. Provider adapters fail explicitly when configuration is missing; they never return simulated success. PayPal uses sandbox only.
+The seller connects PayPal **inside Account settings**, rather than sharing a global merchant
+across every app user. Existing server PayPal environment credentials are used by service adapters;
+they are not automatically assigned to user accounts. Never commit secrets or customer evidence.
 
-See [services](docs/services.md) for integration status, setup, and limitations. Commit verified milestones with `git add <files>` and `git commit -m "<change>"` from this folder. GitHub origin is configured; no deployment is configured yet.
+## Judge walkthrough: one project, one payment, one evidence review
 
-See [frontend design](docs/frontend-design.md) for the UI system. Gemini analysis is wired to a single-workspace development access gate. Multi-user authentication, durable storage/queue, real delivery events, PDF packet generation, and reviewed PayPal submission remain future integration work. The demo packet is JSON for inspecting the sample flow, not a PayPal-ready PDF.
-# Local product infrastructure
+1. Visit the landing page and create an account. New workspaces start empty.
+2. In PayPal Developer, create a **business sandbox account** and a REST sandbox app linked to it.
+   In DeliveryProof → Account, connect that app's Client ID and Secret.
+3. Create a project with a scope and USD amount. Open its overview and create a payment link.
+4. Open the link in a separate browser profile. Approve using a **personal sandbox account**,
+   return to the payment page, then choose **Complete & verify payment**. These are test funds.
+5. Check the business sandbox transaction history. Refresh the seller's project: its Payment
+   evidence now contains the verified capture reference.
+6. Save a real HTTPS delivery link. Open Evidence to inspect the seller-entered record.
+7. Open Response, select records, and describe a test concern such as “The client says the files
+   were not received.” Run Gemini. Inspect its sources and missing acknowledgement.
+8. Review the draft, preserve the gaps, prepare the packet, and download the JSON.
 
-Run `npm run setup:local` to add missing local configuration without replacing existing secrets.
-Run `npm run db:local` in a separate terminal. This downloads MongoDB on first use, binds it to
-127.0.0.1:27017, and keeps its WiredTiger database in `.data/mongodb` between restarts. It is a
-development launcher; use a managed MongoDB URI for hosting. Do not run it alongside another
-MongoDB process on port 27017.
+PayPal accounts: https://developer.paypal.com/dashboard/accounts
+Sandbox apps: https://developer.paypal.com/dashboard/applications/sandbox
+Orders flow: https://developer.paypal.com/whats-an-order/
 
-Create a development account in an interactive terminal with
-`npm run account:create -- you@example.com`. The generated password is printed there once;
-only a salted scrypt hash is stored. Auth.js sign-in is available at `/api/auth/signin`.
+## Suggested demo video: under three minutes
 
-Add `UPLOADTHING_TOKEN` to `.env.local` from your UploadThing app dashboard. Upload credentials
-stay on the server. The upload endpoint requires an authenticated user and a project owned by
-that user. Authenticated upload metadata is persisted after UploadThing's verified callback.
+- **0:00–0:25:** Explain the freelancer's scattered payment and delivery records.
+- **0:25–1:20:** Create a project, show client approval and capture, then the seller's verified receipt.
+- **1:20–2:15:** Save delivery evidence, run Gemini, and highlight a supported finding and a gap.
+- **2:15–2:50:** Review and download the packet. Explain why payment, access, and acceptance differ.
 
-These infrastructure routes are the first product migration step. The existing dashboard still
-uses demo state until its project flows are connected to the persistent repository.
+Record actual flows. Do not replace failed provider calls with success screens.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Seller[Seller workspace] --> Auth[Auth.js credentials session]
+  Auth --> API[Next.js server routes]
+  API --> Mongo[(MongoDB accounts, projects, evidence)]
+  API --> Orders[PayPal sandbox Orders v2]
+  Client[Client payment link] --> Approval[PayPal approval]
+  Approval --> Capture[Server capture and verification]
+  Capture --> Mongo
+  Mongo --> Review[Selected evidence]
+  Review --> Gemini[Gemini structured findings]
+  Gemini --> Human[Human review]
+  Human --> Packet[Reviewed JSON packet]
+```
+
+`src/proxy.ts` is the Next.js 16 middleware convention. It protects the workspace and redirects
+signed-in users away from auth pages. API routes also verify sessions and account ownership.
+Merchant secrets use AES-256-GCM. Original evidence is appended; project updates cannot set payment
+or acknowledgement status. Public payment links are random bearer URLs with seven-day expiry.
+
+## Working today and unfinished work
+
+| Area | Status |
+| --- | --- |
+| Landing, animated auth UI, sign-up/sign-in/sign-out, profile settings | Working |
+| Account-isolated MongoDB projects, scope and delivery history | Working |
+| Seller sandbox connection and Orders v2 creation | Tested against PayPal sandbox, including stable-link retry |
+| Client approval and verified capture | Implemented with validation tests; the full buyer approval/capture still needs a manual walkthrough |
+| Gemini selected-evidence analysis, citation checks, reviewed JSON packet | Working code path; requires a valid Gemini key/model and quota |
+| UploadThing | Authenticated project-scoped server endpoint; upload UI is still pending |
+| Elastic, a hackathon sponsor | Account/project-filtered service adapter and tests; indexing and search UI are pending |
+| Client access and acknowledgement collection | Pending; no fabricated receipts |
+| Dispute import, verified webhooks, refunds, PDF export, PayPal evidence submission | Pending |
+| Email verification, password recovery, production merchant onboarding | Pending |
+
+The repo includes a separate service health API (`npm run dev:api`, port 3001). The Render Blueprint
+currently deploys that API only, not the complete Next.js product. No hosted demo is claimed.
+
+## Verification
+
+```powershell
+npm run check
+npm run test:product
+```
+
+`check` runs TypeScript, unit tests, service compilation, and the Next.js production build.
+`test:product` requires the local app and database. It verifies account creation/session handling,
+redirects, empty workspaces, persistent project APIs, tenant isolation, profile updates, and rejection
+of client-written paid state. It cleans up only its own randomly named test records. Capture tests
+reject mismatched order, project, amount, currency, and pending status.
+
+The UI supports mobile navigation, cookie-persisted light/dark mode, squircle surfaces, SVG path
+animations, and reduced motion. SF Pro is preferred where installed; Windows uses the bundled Inter
+fallback. No SF Pro font files are redistributed.
+
+## Submission notes
+
+The hackathon asks for a working PayPal + AI prototype, runnable instructions or a hosted demo,
+a public source repository with an open-source license, and a public demo video under three minutes.
+Before submitting, complete the real sandbox walkthrough, add the video URL, confirm repository
+visibility, and choose an open-source license. A license has not been selected on the owner's behalf.

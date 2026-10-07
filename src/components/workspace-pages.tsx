@@ -1,12 +1,12 @@
 'use client';
 import Link from 'next/link';
 import { ArrowRight, Files, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
-import { money } from '@/demo/data';
+import { useWorkspace } from '@/components/workspace-provider';
+import { money } from '@/domain/projects';
 import { ProjectList } from './project-list';
 import { ClientMark, Status, EmptyState } from './ui';
 export function ProjectsPage() {
-  const { projects } = useDemo();
+  const { projects } = useWorkspace();
   return (
     <>
       <div className="page-heading">
@@ -20,8 +20,8 @@ export function ProjectsPage() {
   );
 }
 export function DeliveriesPage() {
-  const { projects } = useDemo();
-  const deliveries = projects.filter((project) => project.paid);
+  const { projects } = useWorkspace();
+  const deliveries = projects.filter((project) => !!project.deliveryLink);
   return (
     <>
       <div className="page-heading">
@@ -53,7 +53,7 @@ export function DeliveriesPage() {
           ))
         ) : (
           <EmptyState icon={Files} title="Ready when you are.">
-            Record a demo payment on a project to begin its delivery.
+            Save a delivery link on a project to begin its delivery.
           </EmptyState>
         )}
       </div>
@@ -68,7 +68,7 @@ export function DeliveriesPage() {
   );
 }
 export function DisputesPage() {
-  const { projects } = useDemo();
+  const { projects } = useWorkspace();
   const disputes = projects.filter((project) => project.status === 'dispute');
   return (
     <>
@@ -96,16 +96,14 @@ export function DisputesPage() {
                 </p>
               </div>
               <span className="case-deadline caption">
-                Demo case · Response due October 9
+                Check deadline in PayPal
               </span>
             </div>
             <div className="case-body">
               <div>
-                <h3>“Item not received”</h3>
+                <h3>Open dispute</h3>
                 <p>
-                  The client says the final illustrations weren’t received. Your
-                  records include the agreed scope, payment, delivery, and page
-                  access. Client acknowledgement is missing.
+                  Review the original case in PayPal and build your response from the evidence preserved here.
                 </p>
               </div>
               <Link
@@ -126,7 +124,7 @@ export function DisputesPage() {
         </EmptyState>
       )}
       <p className="caption page-note">
-        Demo case and deadline. A prepared draft does not resolve a dispute or
+        A prepared draft does not resolve a dispute or
         submit evidence.
       </p>
     </>

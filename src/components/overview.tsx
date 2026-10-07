@@ -10,8 +10,8 @@ import {
   Link2,
   MessageSquare,
 } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
-import { money, type EvidenceKind } from '@/demo/data';
+import { useWorkspace } from '@/components/workspace-provider';
+import { money, type EvidenceKind } from '@/domain/projects';
 import { ProjectList } from './project-list';
 import { SummaryCards } from './summary-cards';
 import { WorkspaceStatistics, ConfirmationStatistics } from './workspace-statistics';
@@ -24,7 +24,7 @@ const icons: Record<EvidenceKind, typeof FileText> = {
   Acknowledgement: CheckCircle2,
 };
 export function Overview() {
-  const { projects, activity } = useDemo();
+  const { projects, activity, user } = useWorkspace();
   const broken = projects.find((p) => p.status === 'needs-link');
   const dispute = projects.find((p) => p.status === 'dispute');
   const progress = [
@@ -52,10 +52,10 @@ export function Overview() {
       <div className="page-heading">
         <div>
           <span className="workspace-eyebrow">YOUR WORKSPACE</span>
-          <h1>Welcome back, Alex</h1>
+          <h1>Welcome back, {user?.name.split(' ')[0]}</h1>
           <p>A clear view of your work, from payment to proof.</p>
         </div>
-        <span className="date caption">Oct 6, 2026</span>
+        <span className="date caption">{new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', year: 'numeric' })}</span>
       </div>
       <SummaryCards />
       <div className="grid items-start gap-[18px] min-[1001px]:grid-cols-[minmax(0,1fr)_270px] min-[1001px]:max-[1150px]:grid-cols-[minmax(0,1fr)_230px]">
@@ -77,9 +77,7 @@ export function Overview() {
                 </span>
                 <div>
                   <strong>
-                    {broken.id === 'northstar'
-                      ? 'Northstar’s delivery link has expired'
-                      : `${broken.client} has an expired link`}
+                    {`${broken.client} has an expired link`}
                   </strong>
                   <span>
                     {broken.title} · {money(broken.amount)}
@@ -108,7 +106,7 @@ export function Overview() {
                   <span>
                     {dispute.responsePrepared
                       ? 'Case still open · Not submitted'
-                      : 'Due October 9'}{' '}
+                      : 'Check deadline in PayPal'}{' '}
                     · {money(dispute.amount)}
                   </span>
                 </div>
@@ -142,7 +140,7 @@ export function Overview() {
                     >
                       <span
                         style={{
-                          width: `${(stage.count / projects.length) * 100}%`,
+                          width: `${(stage.count / Math.max(projects.length, 1)) * 100}%`,
                         }}
                       />
                     </div>

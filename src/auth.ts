@@ -1,11 +1,13 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 import { database } from './services/database/mongodb.ts';
 import { verifyPassword } from './services/database/password.ts';
 
 const credentialsSchema = z.object({ email: z.email().max(254), password: z.string().min(12).max(128) });
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  pages: { signIn: '/signin', error: '/signin' },
   session: { strategy: 'jwt', maxAge: 8 * 60 * 60 },
   providers: [Credentials({
     credentials: { email: { type: 'email' }, password: { type: 'password' } },
@@ -26,7 +28,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   })],
   callbacks: {
-    jwt({ token, user }) { if (user) token.sub = user.id; return token; },
+    async jwt({ token, user }) {
+      if (user) token.sub = user.id;
+      if (token.sub) {
+        try {
+          const db = await database();
+          const account = await db.collection('users').findOne({ _id: new ObjectId(token.sub) });
+          if (!account) return null;
+          token.name = account.name; token.email = account.email;
+        } catch { return null; }
+      }
+      return token;
+    },
     session({ session, token }) { if (session.user && token.sub) session.user.id = token.sub; return session; },
   },
 });

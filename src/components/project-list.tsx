@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronRight, FolderCheck, Search } from 'lucide-react';
-import { money, needsAttention, type Project } from '@/demo/data';
+import { money, needsAttention, type Project } from '@/domain/projects';
 import { ClientMark, Status, EmptyState } from './ui';
 import { SlidingPill } from './motion';
 export function ProjectList({

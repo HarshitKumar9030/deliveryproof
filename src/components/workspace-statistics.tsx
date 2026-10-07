@@ -3,7 +3,7 @@
 import { useId, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { BarChart3, CreditCard, ArrowUpRight } from 'lucide-react';
-import { money, type Project } from '@/demo/data';
+import { money, type Project } from '@/domain/projects';
 import { CanvasAccent } from './canvas-accent';
 
 export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
@@ -18,7 +18,7 @@ export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
         <div>
           <span className="workspace-eyebrow">WORKSPACE STATISTICS</span>
           <h2>{view === 'records' ? 'Every record, in view.' : 'Payments, project by project.'}</h2>
-          <p>{view === 'records' ? 'Preserved evidence across your projects' : 'Received payments in this demo workspace'}</p>
+          <p>{view === 'records' ? 'Preserved evidence across your projects' : 'Received payments in this workspace'}</p>
         </div>
         <div className="statistics-switch" aria-label="Chart metric">
           <button aria-pressed={view === 'records'} onClick={() => setView('records')}><BarChart3 size={15} aria-hidden="true" />Records</button>
@@ -57,7 +57,7 @@ export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
         </div>
       </div>
       {!projects.length && <p className="statistics-empty">Add a project to start building your workspace statistics.</p>}
-      <div className="statistics-footnote"><span className="statistics-legend-dot" />{view === 'records' ? 'Record count · open a project to inspect its sources' : 'Completed demo payments · open a project for details'}</div>
+      <div className="statistics-footnote"><span className="statistics-legend-dot" />{view === 'records' ? 'Record count · open a project to inspect its sources' : 'Completed verified payments · open a project for details'}</div>
     </section>
   );
 }

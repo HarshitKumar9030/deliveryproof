@@ -1,7 +1,7 @@
 'use client';
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDemo } from '@/demo/demo-provider';
+import { useWorkspace } from '@/components/workspace-provider';
 import { Dialog } from './ui';
 export function NewProjectDialog({
   open,
@@ -10,11 +10,13 @@ export function NewProjectDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { createProject } = useDemo();
+  const { createProject } = useWorkspace();
   const router = useRouter();
   const [error, setError] = useState('');
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const [saving, setSaving] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     const form = event.currentTarget;
     const data = new FormData(form);
     const client = String(data.get('client') ?? '').trim();
@@ -34,7 +36,11 @@ export function NewProjectDialog({
       );
       return;
     }
-    const id = createProject({ client, title, scope, amount });
+    setSaving(true);
+    let id: string;
+    try { id = await createProject({ client, title, scope, amount }); }
+    catch (error) { setError(error instanceof Error ? error.message : 'Could not save project'); return; }
+    finally { setSaving(false); }
     form.reset();
     setError('');
     onClose();
@@ -93,14 +99,14 @@ export function NewProjectDialog({
           </p>
         )}
         <p className="caption">
-          Demo project. Saved for this session; resets on refresh.
+          Saved to your account. Your scope is a seller-entered record.
         </p>
         <div className="dialog-actions">
           <button className="button secondary" type="button" onClick={onClose}>
             Cancel
           </button>
-          <button className="button primary gradient-edge" type="submit">
-            Create project
+          <button className="button primary gradient-edge" type="submit" disabled={saving}>
+            {saving ? 'Saving…' : 'Create project'}
           </button>
         </div>
       </form>

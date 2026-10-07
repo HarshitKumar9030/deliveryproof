@@ -13,7 +13,7 @@ import {
   ArrowDown,
   CornerDownLeft,
 } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
+import { useWorkspace } from '@/components/workspace-provider';
 import { Dialog } from './ui';
 
 export function CommandPalette({
@@ -28,7 +28,7 @@ export function CommandPalette({
   onClosed: () => void;
 }) {
   const router = useRouter();
-  const { projects } = useDemo();
+  const { projects } = useWorkspace();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +57,7 @@ export function CommandPalette({
       title: 'Overview',
       detail: 'Go to',
       icon: House,
-      run: () => go('/'),
+      run: () => go('/dashboard'),
     },
     {
       id: 'projects',

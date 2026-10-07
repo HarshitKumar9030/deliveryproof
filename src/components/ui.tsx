@@ -2,7 +2,7 @@
 import { useLayoutEffect, useRef, useId, type ReactNode } from 'react';
 import { X, ArrowRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { statusLabels, type Project } from '@/demo/data';
+import { statusLabels, type Project } from '@/domain/projects';
 export function ClientMark({
   client,
   small = false,
@@ -12,34 +12,7 @@ export function ClientMark({
 }) {
   return (
     <span aria-hidden="true" className={`client-mark${small ? ' small' : ''}`}>
-      {client === 'Northstar Studio' ? (
-        <svg viewBox="0 0 48 48" fill="currentColor">
-          <path d="M24 2C21 16 16 21 2 24c14 3 19 8 22 22 3-14 8-19 22-22C32 21 27 16 24 2Z" />
-        </svg>
-      ) : client === 'Forma' ? (
-        <svg viewBox="0 0 48 48" fill="currentColor">
-          <path d="M22 3a21 21 0 0 0 0 42V3Zm4 0v19h19A21 21 0 0 0 26 3Z" />
-        </svg>
-      ) : client === 'Orbit Labs' ? (
-        <svg viewBox="0 0 48 48">
-          <ellipse cx="30" cy="24" rx="15" ry="18" fill="currentColor" />
-          <ellipse
-            cx="16"
-            cy="24"
-            rx="13"
-            ry="18"
-            fill="var(--paper)"
-            stroke="currentColor"
-            strokeWidth="2.5"
-          />
-        </svg>
-      ) : client === 'Acme Digital' ? (
-        <svg viewBox="0 0 48 48" fill="currentColor">
-          <path d="M24 2 1 44h22l13-23L24 2Zm12 25L26 44h21L36 27Z" />
-        </svg>
-      ) : (
-        client.slice(0, 1)
-      )}
+      {client.slice(0, 2).toUpperCase()}
     </span>
   );
 }

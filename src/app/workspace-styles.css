@@ -581,7 +581,7 @@
   .response-intro p {
     @apply text-xs text-muted mt-2 leading-relaxed;
   }
-  .response-demo-tag {
+  .response-workspace-tag {
     @apply flex items-center gap-2 shrink-0 text-[10px] text-muted rounded-full bg-surface px-3 py-2;
   }
   .response-step-label {

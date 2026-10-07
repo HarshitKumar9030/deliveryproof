@@ -9,7 +9,7 @@ import {
   MessageSquareCheck,
   ArrowUpRight,
 } from 'lucide-react';
-import type { Evidence, EvidenceKind } from '@/demo/data';
+import type { Evidence, EvidenceKind } from '@/domain/projects';
 import { Dialog } from './ui';
 
 export const evidenceIcons: Record<EvidenceKind, typeof FileText> = {
@@ -48,7 +48,7 @@ export function SourcePreview({
             {displayed.excerpt}
           </blockquote>
           <p className="caption">
-            Source {displayed.id} · Synthetic demo record.
+            Source {displayed.id} · Preserved project record.
           </p>
         </>
       )}
@@ -79,7 +79,7 @@ export function EvidenceList({ evidence }: { evidence: Evidence[] }) {
                 </span>
               </div>
               <span className="source-id">
-                {item.id.startsWith('DEMO-') ? 'Demo' : item.id}
+                {item.id}
               </span>
               <ArrowUpRight size={18} aria-hidden="true" />
             </button>

@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Check, Info, FolderSearch } from 'lucide-react';
-import { useDemo } from '@/demo/demo-provider';
-import { money, type Project } from '@/demo/data';
+import { useWorkspace } from '@/components/workspace-provider';
+import { money, type Project } from '@/domain/projects';
 import { ClientMark, Status, EmptyState, TextLink } from './ui';
 import { EvidenceList } from './evidence-list';
 import { DeliveryPanel } from './delivery-panel';
 import { ResponseBuilder } from './response-builder';
 import { SlidingPill } from './motion';
+import { ProjectPayment } from './project-payment';
 
 const tabs = ['overview', 'delivery', 'evidence', 'response'] as const;
 type Tab = (typeof tabs)[number];
@@ -58,7 +59,7 @@ export function ProjectDetail({
   id: string;
   requestedTab: string;
 }) {
-  const { projects, updateProject, notify } = useDemo();
+  const { projects } = useWorkspace();
   const project = projects.find((item) => item.id === id);
   if (!project)
     return (
@@ -69,10 +70,9 @@ export function ProjectDetail({
         </Link>
         <EmptyState
           icon={FolderSearch}
-          title="This project isn’t in your session."
+          title="This project isn’t available."
         >
-          New demo projects reset on refresh. Return to your projects to start
-          again.
+          This project may not belong to your account. Return to your projects.
         </EmptyState>
       </>
     );
@@ -102,7 +102,7 @@ export function ProjectDetail({
       </div>
       <div className="detail-status">
         <Status project={project} />
-        <span className="caption">Demo project</span>
+        <span className="caption">Your project</span>
       </div>
       <Progress project={project} />
       <nav className="detail-tabs t-tabs" aria-label="Project sections">
@@ -147,37 +147,12 @@ export function ProjectDetail({
             <aside className="next-panel detail-next">
               <h2>Up next</h2>
               {!project.paid ? (
-                <>
-                  <h3>Record the payment.</h3>
-                  <p>
-                    Try a sample payment event to move this project into the
-                    delivery stage.
-                  </p>
-                  <button
-                    className="button primary"
-                    onClick={() => {
-                      updateProject(
-                        id,
-                        { paid: true, status: 'ready' },
-                        'Demo payment recorded',
-                        {
-                          kind: 'Payment',
-                          title: 'Demo payment received',
-                          excerpt: `Synthetic payment for ${project.client}: ${money(project.amount)} USD, marked completed for this demo session.`,
-                        },
-                      );
-                      notify('Demo payment recorded. Ready for delivery.');
-                    }}
-                  >
-                    Record demo payment
-                    <ArrowRight size={17} aria-hidden="true" />
-                  </button>
-                </>
+                <><h3>Get paid through PayPal.</h3><p>A payment will appear here only after a verified PayPal capture. You can preserve the delivery link while payment is pending.</p><ProjectPayment projectId={id}/></>
               ) : project.status === 'dispute' ? (
                 <>
                   <h3>Put your evidence in order.</h3>
                   <p>
-                    Your response is due October 9 in this demo. Review the
+                    Check the deadline in PayPal. Review the
                     sources, preserve the gaps, and prepare a draft.
                   </p>
                   <Link
@@ -192,7 +167,7 @@ export function ProjectDetail({
                 <>
                   <h3>Everything together.</h3>
                   <p>
-                    Your demo handover is complete. Keep the records so you can
+                    Your handover is complete. Keep the records so you can
                     refer back to them.
                   </p>
                   <Link
@@ -214,7 +189,7 @@ export function ProjectDetail({
                   <p>
                     {project.status === 'needs-link'
                       ? 'Replace the expired link while keeping the original delivery record.'
-                      : 'Finish the delivery flow, then record a sample client acknowledgement.'}
+                      : 'Save the delivery link and preserve the original records.'}
                   </p>
                   <Link
                     className="button primary"
@@ -255,18 +230,7 @@ export function ProjectDetail({
             )}
           </>
         )}
-        {tab === 'response' &&
-          (project.status === 'dispute' ? (
-            <ResponseBuilder key={project.id} project={project} />
-          ) : (
-            <div className="soft-panel">
-              <h2>No dispute on this project.</h2>
-              <p>
-                Keep preserving the delivery evidence as the project moves
-                forward.
-              </p>
-            </div>
-          ))}
+        {tab === 'response' && <ResponseBuilder key={project.id} project={project} />}
       </div>
     </>
   );
