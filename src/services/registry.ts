@@ -1,10 +1,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { GoogleGenAI } from '@google/genai';
-import { required } from '../config.js';
-import { PayPalService } from './paypal/paypal.service.js';
-import { ElasticEvidenceService } from './elastic/elastic.service.js';
-import { AiEvidenceService } from './ai/ai.service.js';
-import { LocalEvidenceStorage } from './storage/storage.service.js';
+import { required } from '../config.ts';
+import { PayPalService } from './paypal/paypal.service.ts';
+import { ElasticEvidenceService } from './elastic/elastic.service.ts';
+import { AiEvidenceService } from './ai/ai.service.ts';
+import { LocalEvidenceStorage } from './storage/storage.service.ts';
 
 /** Lazy factories: booting health checks never requires provider credentials. Server only. */
 export function createServices(env: NodeJS.ProcessEnv = process.env) {

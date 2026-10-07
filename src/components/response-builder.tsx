@@ -6,6 +6,7 @@ import type { Project, Evidence } from '@/demo/data';
 import { useDemo } from '@/demo/demo-provider';
 import { evidenceIcons, SourcePreview } from './evidence-list';
 import { MotionCheckbox, SuccessCheck } from './motion';
+import { GeminiReview } from './gemini-review';
 
 export function ResponseBuilder({ project }: { project: Project }) {
   const { updateProject, notify } = useDemo();
@@ -221,6 +222,12 @@ export function ResponseBuilder({ project }: { project: Project }) {
                   Locally assembled from sample records.
                 </span>
               </div>
+              <GeminiReview projectId={project.id} sourceIds={sources.map(source => source.id)} onDraft={(value) => {
+                setDraft(value);
+                setDraftSources(selectionKey);
+                setReviewed(false);
+                setStep(2);
+              }} />
             </>
           )}
           {step === 2 && (

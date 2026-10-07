@@ -1,4 +1,19 @@
 @layer components {
+  .gemini-review {
+    @apply rounded-[24px] bg-canvas p-5 mt-7;
+  }
+  .gemini-heading {
+    @apply flex flex-wrap items-center gap-2 text-accent;
+  }
+  .gemini-heading h3 { @apply text-sm font-medium text-ink; }
+  .gemini-heading > span { @apply text-[10px] text-muted; }
+  .gemini-review > p { @apply text-xs text-muted leading-relaxed my-3; }
+  .gemini-reason { @apply grid gap-2 text-xs mt-4 mb-4; }
+  .gemini-reason textarea { @apply bg-paper text-xs leading-relaxed p-4 min-w-0 w-full; }
+  .gemini-result { @apply mt-5 text-xs leading-relaxed; }
+  .gemini-result h4 { @apply text-sm font-medium mt-4 mb-2; }
+  .gemini-result ul { @apply grid gap-3 pl-4 mt-3 mb-5; }
+  .gemini-result li > span { @apply text-[10px] text-accent; }
   /* Compact reference layout, refined with Apple-like graphite and amber surfaces. */
   .theme-root {
     --canvas: #f3f2ee;

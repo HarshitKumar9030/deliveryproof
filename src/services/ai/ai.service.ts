@@ -1,7 +1,7 @@
 import type { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
-import { AnalysisSchema, EvidenceSchema, ScopeSchema, validateCitations } from '../../domain/evidence.js';
-import type { EvidenceRecord, EvidenceScope } from '../../domain/evidence.js';
+import { AnalysisSchema, EvidenceSchema, ScopeSchema, validateCitations } from '../../domain/evidence.ts';
+import type { EvidenceRecord, EvidenceScope } from '../../domain/evidence.ts';
 
 export class AiEvidenceService {
   constructor(private readonly client: GoogleGenAI, private readonly model: string) {}

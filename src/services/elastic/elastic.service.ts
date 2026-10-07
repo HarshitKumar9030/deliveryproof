@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
-import { EvidenceSchema, ScopeSchema } from '../../domain/evidence.js';
-import type { EvidenceRecord, EvidenceScope } from '../../domain/evidence.js';
+import { EvidenceSchema, ScopeSchema } from '../../domain/evidence.ts';
+import type { EvidenceRecord, EvidenceScope } from '../../domain/evidence.ts';
 
 export class ElasticEvidenceService {
   constructor(private readonly client: Client, private readonly index: string) {}

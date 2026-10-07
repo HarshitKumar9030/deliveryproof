@@ -4,7 +4,7 @@
 
 | Technology | Files | Current scope |
 | --- | --- | --- |
-| Next.js frontend | `src/app/`, `src/components/`, `src/demo/` | Local demo projects, delivery events, source inspection, reviewed JSON packet export. No provider calls or authenticated data |
+| Next.js frontend | `src/app/`, `src/components/`, `src/demo/` | Local demo projects, reviewed JSON export, and explicitly invoked server-side Gemini analysis with a workspace session gate |
 | PayPal | `src/services/paypal/` | Sandbox OAuth, create/capture order, read dispute, verify webhook via PayPal, multipart PDF evidence transport |
 | Elastic | `src/services/elastic/` | Index mapping, scoped indexing and lexical search; vector search is a later enhancement |
 | AI / Gemini | `src/services/ai/` | Google GenAI structured JSON output, scope checks, citation-ID validation; configurable model |
@@ -54,7 +54,7 @@ Do not automatically retry evidence submission: first inspect the case if its re
 6. AG Studio dashboard and its license setup. AG Grid contracts alone are not AG Studio integration.
 7. Semantic retrieval, evidence quotation checks, and evaluations. Valid citation IDs do not prove that a generated statement is supported by its cited text.
 
-The current HTTP app deliberately exposes only `/health`; credentialed payment and evidence services are not exposed as unauthenticated routes.
+The separate HTTP service exposes only `/health`. Next.js now exposes workspace login/logout and authenticated `/api/analysis`, scoped to server-owned demo records. See [credentials and boundaries](credentials.md). Credentialed payment and submission services remain unexposed.
 Tests use mocked provider responses and temporary local files. Live connectivity and an end-to-end dispute have not been tested.
 
 ## Optional sponsors

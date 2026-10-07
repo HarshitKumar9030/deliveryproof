@@ -1,4 +1,4 @@
-import type { EvidenceScope } from '../../domain/evidence.js';
+import type { EvidenceScope } from '../../domain/evidence.ts';
 
 export type EvidenceJob = EvidenceScope & {
   id: string;

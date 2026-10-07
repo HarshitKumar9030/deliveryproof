@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { ScopeSchema } from '../../domain/evidence.js';
-import type { EvidenceScope } from '../../domain/evidence.js';
+import { ScopeSchema } from '../../domain/evidence.ts';
+import type { EvidenceScope } from '../../domain/evidence.ts';
 
 /** Local development adapter. Never expose the root folder through static serving. */
 export class LocalEvidenceStorage {

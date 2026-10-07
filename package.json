@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "setup:local": "node tools/setup-local.mjs",
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",

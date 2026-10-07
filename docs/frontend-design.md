@@ -28,7 +28,7 @@ Tailwind v4 with @tailwindcss/postcss. globals.css is the single stylesheet entr
 
 ## Functional demo
 
-Create project → demo payment → delivery → acknowledgement. Restore expired delivery links. Select dispute records → inspect sources → edit/review draft → confirm review → prepare/export demo JSON. Ctrl/⌘K searches routes/projects and starts creation; arrow keys, Enter and Escape work. Native dialogs preserve focus. Changes survive navigation and reset on refresh. No external PayPal or Gemini calls.
+Create project → demo payment → delivery → acknowledgement. Restore expired delivery links. Select dispute records → inspect sources → edit/review draft → confirm review → prepare/export demo JSON. Ctrl/⌘K searches routes/projects and starts creation; arrow keys, Enter and Escape work. Native dialogs preserve focus. Changes survive navigation and reset on refresh. No external PayPal calls. The optional Gemini review explicitly sends selected canonical demo records through an authenticated server endpoint.
 
 Evidence chart bars show preserved record counts, not fabricated financial performance. Access records are distinguished from acceptance. Preparing a response preserves the open dispute and does not claim submission.
 

@@ -8,7 +8,7 @@ export type EvidenceScope = z.infer<typeof ScopeSchema>;
 
 export const EvidenceSchema = ScopeSchema.extend({
   id: z.string().regex(/^[A-Za-z0-9_-]{1,100}$/),
-  kind: z.enum(['agreement', 'delivery', 'access', 'acknowledgement', 'message']),
+  kind: z.enum(['agreement', 'payment', 'delivery', 'access', 'acknowledgement', 'message']),
   occurredAt: z.iso.datetime(),
   text: z.string().min(1).max(100_000),
   sourceRef: z.string().min(1),
