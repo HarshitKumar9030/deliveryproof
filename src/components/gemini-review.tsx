@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ScanText, ArrowRight } from 'lucide-react';
 import type { EvidenceAnalysis } from '@/domain/evidence';
 
 
@@ -46,10 +46,10 @@ export function GeminiReview({ projectId, sourceIds, onDraft }: {
   }
   return (
     <div className="gemini-review">
-      <div className="gemini-heading"><Sparkles size={18} aria-hidden="true" /><h3>Review the evidence with Gemini</h3><span>Human review required</span></div>
-      <p>Find supported facts and missing evidence. Your selected records and dispute reason are sent to Gemini when you run analysis.</p>
+      <div className="gemini-heading"><ScanText size={18} aria-hidden="true" /><h3>Evidence review</h3><span>Human review required</span></div>
+      <p>Find supported facts and missing evidence. Your selected records and dispute reason are sent to the configured AI model when you run analysis.</p>
       <label className="gemini-reason">Dispute reason<textarea rows={3} maxLength={2000} value={reason} placeholder="Describe the client's dispute, for example: the client says the agreed files were not delivered." onChange={event => { setReason(event.target.value); setAnalysis(null); }} disabled={busy} /></label>
-      <button className="button secondary" disabled={busy || !sourceIds.length || reason.trim().length < 10} onClick={analyse}><Sparkles size={15} aria-hidden="true" />{busy ? 'Analysing selected records…' : 'Analyse with Gemini'}</button>
+      <button className="button secondary" disabled={busy || !sourceIds.length || reason.trim().length < 10} onClick={analyse}><ScanText size={15} aria-hidden="true" />{busy ? 'Analysing selected records…' : 'Analyse evidence'}</button>
       {error && <p className="form-error" role="alert">{error}</p>}
       {analysis && <div className="gemini-result" aria-live="polite">
         <h4>Evidence findings</h4><p>{analysis.summary}</p>

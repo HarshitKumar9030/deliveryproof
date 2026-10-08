@@ -30,6 +30,19 @@ gaps. The server loads records belonging to the signed-in account and rejects un
 The reviewer checks the wording and prepares a JSON packet containing the draft and original
 source snapshots. Valid citations still need human review; they do not guarantee factual accuracy.
 
+**Gemini also reviews the handover before a dispute.** From each project's scope it builds concrete
+delivery checkpoints, maps them to original evidence, flags partial or missing documentation,
+and proposes next actions in the workspace. Agreement-only claims cannot count as supported
+delivery. Its suggested client message can be reviewed and copied. Reviews persist in MongoDB
+and are marked stale when the scope, payment, delivery, or evidence changes. It does not open
+delivery URLs or inspect file contents.
+
+**Clients can acknowledge receipt.** In Delivery, generate a seven-day confirmation link and
+share it with the client. Their self-declared name and timestamp become an append-only
+Acknowledgement record. The signed-in seller cannot acknowledge their own delivery. Receipt
+does not imply satisfaction or verified identity. Changing the delivery URL invalidates the old
+confirmation link and requires a fresh receipt. Acknowledgement never marks a project paid.
+
 This is a sandbox prototype, not a dispute adjudicator. It does not promise Seller Protection,
 a winning outcome, live settlement, or automatic submission to PayPal.
 
@@ -85,10 +98,13 @@ they are not automatically assigned to user accounts. Never commit secrets or cu
    return to the payment page, then choose **Complete & verify payment**. These are test funds.
 5. Check the business sandbox transaction history. Refresh the seller's project: its Payment
    evidence now contains the verified capture reference.
-6. Save a real HTTPS delivery link. Open Evidence to inspect the seller-entered record.
-7. Open Response, select records, and describe a test concern such as “The client says the files
+6. Run **AI review** from the project overview. Expand its scope checkpoints and inspect the cited
+   sources and missing documentation. Follow a suggested action to Delivery and save a real HTTPS link.
+7. Generate a confirmation link, open it in a separate browser profile, and acknowledge receipt.
+   Refresh confirmation status in the seller's Delivery tab. Inspect the new Acknowledgement source.
+8. Open Response, select records, and describe a test concern such as “The client says the files
    were not received.” Run Gemini. Inspect its sources and missing acknowledgement.
-8. Review the draft, preserve the gaps, prepare the packet, and download the JSON.
+9. Review the draft, preserve the gaps, prepare the packet, and download the JSON.
 
 PayPal accounts: https://developer.paypal.com/dashboard/accounts
 Sandbox apps: https://developer.paypal.com/dashboard/applications/sandbox
@@ -136,7 +152,9 @@ or acknowledgement status. Public payment links are random bearer URLs with seve
 | Gemini selected-evidence analysis, citation checks, reviewed JSON packet | Working code path; requires a valid Gemini key/model and quota |
 | UploadThing | Authenticated project-scoped server endpoint; upload UI is still pending |
 | Elastic, a hackathon sponsor | Account/project-filtered service adapter and tests; indexing and search UI are pending |
-| Client access and acknowledgement collection | Pending; no fabricated receipts |
+| Client acknowledgement | Working shared-link flow with explicit receipt, timestamp, ownership checks, idempotency, and changed-link invalidation; link-holder identity is self-declared |
+| Gemini handover checkpoints and next actions | Working; structured, cited scope review with persisted results and stale-review detection |
+| Independent client identity verification and file-content inspection | Pending |
 | Dispute import, verified webhooks, refunds, PDF export, PayPal evidence submission | Pending |
 | Email verification, password recovery, production merchant onboarding | Pending |
 
@@ -148,6 +166,9 @@ currently deploys that API only, not the complete Next.js product. No hosted dem
 ```powershell
 npm run check
 npm run test:product
+npm run test:handover
+# Optional: one real Gemini request using the configured key and model.
+npm run test:handover -- --ai
 ```
 
 `check` runs TypeScript, unit tests, service compilation, and the Next.js production build.
@@ -155,6 +176,11 @@ npm run test:product
 redirects, empty workspaces, persistent project APIs, tenant isolation, profile updates, and rejection
 of client-written paid state. It cleans up only its own randomly named test records. Capture tests
 reject mismatched order, project, amount, currency, and pending status.
+
+`test:handover` creates isolated test accounts and verifies confirmation ownership, explicit
+receipt, repeated-submit idempotency, changed-link invalidation, and preservation of unpaid
+state. `--ai` also verifies a live structured review and stale-result detection. The script removes
+its own projects, receipt links, reviews, and accounts afterward.
 
 The UI supports mobile navigation, cookie-persisted light/dark mode, squircle surfaces, SVG path
 animations, and reduced motion. SF Pro is preferred where installed; Windows uses the bundled Inter

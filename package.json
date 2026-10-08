@@ -19,7 +19,8 @@
     "check": "npm run typecheck && npm test && npm run build:api && npm run build",
     "db:local": "node tools/mongo-local.mjs",
     "account:create": "node tools/create-account.mjs",
-    "test:product": "node tools/verify-product.mjs"
+    "test:product": "node tools/verify-product.mjs",
+    "test:handover": "node tools/verify-handover.mjs"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.5.1",

@@ -5,6 +5,7 @@ import { database } from '@/services/database/mongodb';
 import { sameOrigin } from '@/services/workspace/session';
 import { readJson } from '@/services/workspace/request';
 import type { Project } from '@/domain/projects';
+import { hasCurrentConfirmation } from '@/domain/handover';
 const delivery = z.object({ deliveryLink: z.url().max(2000).refine(s => { const url = new URL(s); return url.protocol === 'https:' && !url.username && !url.password; }) }).strict();
 const packet = z.object({ responsePrepared: z.literal(true), preparedPacket: z.object({ draft: z.string().trim().min(1).max(30000), sources: z.array(z.object({ id: z.string(), kind: z.string(), title: z.string(), date: z.string(), excerpt: z.string() }).strict()).min(1).max(100), reviewedAt: z.string() }).strict() }).strict();
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -25,7 +26,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const project = await collection.findOne(filter);
     if (!project) return Response.json({ error: 'Project unavailable' }, { status: 404 });
     if (link.success) {
-      await collection.updateOne(filter, { $set: { deliveryLink: link.data.deliveryLink, status: project.status === 'dispute' ? 'dispute' : 'delivered' }, $push: { evidence: { id: randomUUID(), kind: 'Delivery', title: 'Delivery link saved by seller', date: new Date().toISOString(), excerpt: `Seller saved this delivery URL: ${link.data.deliveryLink}. This does not establish client access or acceptance.` } } });
+      await collection.updateOne(filter, { $set: { deliveryLink: link.data.deliveryLink, status: project.status === 'dispute' ? 'dispute' : project.paid && hasCurrentConfirmation({ ...project, deliveryLink: link.data.deliveryLink }) ? 'complete' : 'delivered' }, $push: { evidence: { id: randomUUID(), kind: 'Delivery', title: 'Delivery link saved by seller', date: new Date().toISOString(), excerpt: `Seller saved this delivery URL: ${link.data.deliveryLink}. This does not establish client access or acceptance.` } } });
+      await collection.updateOne({ ...filter, paid: true, status: { $ne: 'dispute' }, $expr: { $eq: ['$deliveryLink', '$deliveryConfirmation.deliveryLink'] } }, { $set: { status: 'complete' } });
     } else if (reviewed.success) {
       const input = reviewed.data.preparedPacket;
       const ids = input.sources.map(s => s.id);

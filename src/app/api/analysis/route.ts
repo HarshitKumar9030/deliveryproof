@@ -26,5 +26,5 @@ export async function POST(request: Request) {
   const analysis = await createServices().ai().analyse(scope,input.reason,records);
   await db.collection('analyses').insertOne({...scope,sourceIds:input.sourceIds,reason:input.reason,analysis,createdAt:new Date()});
   return Response.json({analysis,sourceIds:input.sourceIds},{headers:{'Cache-Control':'no-store'}});
- } catch { return reply('Analysis could not complete. Check database and Gemini configuration, then retry.',502); }
+ } catch { return reply('Analysis could not complete. Check database and AI configuration, then retry.',502); }
 }

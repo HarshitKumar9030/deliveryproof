@@ -796,6 +796,10 @@
     mask-composite: exclude;
     animation: dp-border-orbit 7s linear infinite;
   }
+  .handover-review-panel::before {
+    opacity: .5;
+    animation-duration: 9s;
+  }
   .icon-button,
   .button,
   .command-trigger,

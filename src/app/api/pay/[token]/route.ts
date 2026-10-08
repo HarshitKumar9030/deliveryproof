@@ -51,6 +51,7 @@ export async function POST(request:Request,context:{params:Promise<{token:string
     const capture=verifiedCapture(order,{orderId:payment.orderId,projectId:project.id,value:payment.value});
     await db.collection<Project & {ownerId:string}>('projects').updateOne({id:project.id,ownerId:payment.ownerId,paid:false},{$set:{paid:true,status:project.status==='dispute'?'dispute':project.deliveryLink?'delivered':'ready'},$push:{evidence:{id:capture.id,kind:'Payment',title:'PayPal sandbox payment captured',date:new Date().toISOString(),excerpt:`PayPal confirmed capture ${capture.id} for ${capture.amount.value} USD. Order ${payment.orderId}, project ${project.id}. Sandbox test funds.`}}});
     await db.collection('payments').updateOne({_id:payment._id},{$set:{state:'complete',captureId:capture.id,completedAt:new Date()}});
+    await db.collection('projects').updateOne({id:project.id,ownerId:payment.ownerId,paid:true,status:{$ne:'dispute'},deliveryLink:{$ne:''},$expr:{$eq:['$deliveryLink','$deliveryConfirmation.deliveryLink']}},{$set:{status:'complete'}});
     return Response.json({paid:true});
   } catch { return Response.json({error:'Payment could not be verified. Retry to reconcile the same PayPal order; no new order will be created.'},{status:502}); }
 }

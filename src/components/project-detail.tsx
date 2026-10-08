@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Check, Info, FolderSearch } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Info, FolderSearch, CreditCard, PackageCheck, FileCheck2, ScanText } from 'lucide-react';
 import { useWorkspace } from '@/components/workspace-provider';
 import { money, type Project } from '@/domain/projects';
 import { ClientMark, Status, EmptyState, TextLink } from './ui';
@@ -10,8 +10,10 @@ import { DeliveryPanel } from './delivery-panel';
 import { ResponseBuilder } from './response-builder';
 import { SlidingPill } from './motion';
 import { ProjectPayment } from './project-payment';
+import { HandoverReview } from './handover-review';
+import { hasCurrentConfirmation } from '@/domain/handover';
 
-const tabs = ['overview', 'delivery', 'evidence', 'response'] as const;
+const tabs = ['overview', 'delivery', 'evidence', 'review', 'response'] as const;
 type Tab = (typeof tabs)[number];
 function Progress({ project }: { project: Project }) {
   const stages = [
@@ -26,9 +28,7 @@ function Progress({ project }: { project: Project }) {
     },
     {
       label: 'Confirmation',
-      done: project.evidence.some(
-        (source) => source.kind === 'Acknowledgement',
-      ),
+      done: hasCurrentConfirmation(project),
     },
   ];
   const next = stages.findIndex((stage) => !stage.done);
@@ -108,7 +108,6 @@ export function ProjectDetail({
       <nav className="detail-tabs t-tabs" aria-label="Project sections">
         <SlidingPill value={tab} />
         {tabs
-          .filter((item) => item !== 'response' || project.status === 'dispute')
           .map((item) => (
             <Link
               className={`t-tab${tab === item ? ' active' : ''}`}
@@ -122,7 +121,7 @@ export function ProjectDetail({
                   ? 'Delivery'
                   : item === 'evidence'
                     ? `Evidence (${project.evidence.length})`
-                    : 'Response'}
+                    : item === 'review' ? <span className="inline-flex items-center gap-1.5"><ScanText size={13} aria-hidden="true"/>AI review</span> : 'Response'}
             </Link>
           ))}
       </nav>
@@ -134,6 +133,7 @@ export function ProjectDetail({
                 <h2>The agreed work.</h2>
                 <p>{project.scope}</p>
               </section>
+              <HandoverReview project={project}/>
               <section>
                 <div className="section-heading">
                   <h2>Preserved records</h2>
@@ -144,16 +144,15 @@ export function ProjectDetail({
                 <EvidenceList evidence={project.evidence.slice(0, 3)} />
               </section>
             </div>
-            <aside className="next-panel detail-next">
-              <h2>Up next</h2>
+            <aside className="next-panel detail-next !rounded-[24px]">
+              <div className="flex items-center justify-between"><h2>Up next</h2>{!project.paid ? <CreditCard size={18} className="text-accent" aria-hidden="true"/> : project.status === 'dispute' ? <FileCheck2 size={18} className="text-accent" aria-hidden="true"/> : <PackageCheck size={18} className="text-accent" aria-hidden="true"/>}</div>
               {!project.paid ? (
-                <><h3>Get paid through PayPal.</h3><p>A payment will appear here only after a verified PayPal capture. You can preserve the delivery link while payment is pending.</p><ProjectPayment projectId={id}/></>
+                <><h3>Get paid.</h3><p>Share a secure PayPal checkout.</p><ProjectPayment projectId={id}/><Link href={`/projects/${id}?tab=delivery`} className="mt-4 inline-flex items-center gap-2 text-xs text-muted"><PackageCheck size={15} aria-hidden="true"/>{project.deliveryLink ? 'Request delivery confirmation' : 'Add delivery'}<ArrowRight size={13} aria-hidden="true"/></Link></>
               ) : project.status === 'dispute' ? (
                 <>
                   <h3>Put your evidence in order.</h3>
                   <p>
-                    Check the deadline in PayPal. Review the
-                    sources, preserve the gaps, and prepare a draft.
+                    Review sources and prepare your draft.
                   </p>
                   <Link
                     className="button primary"
@@ -167,8 +166,7 @@ export function ProjectDetail({
                 <>
                   <h3>Everything together.</h3>
                   <p>
-                    Your handover is complete. Keep the records so you can
-                    refer back to them.
+                    Payment and receipt are recorded.
                   </p>
                   <Link
                     className="button primary"
@@ -189,13 +187,13 @@ export function ProjectDetail({
                   <p>
                     {project.status === 'needs-link'
                       ? 'Replace the expired link while keeping the original delivery record.'
-                      : 'Save the delivery link and preserve the original records.'}
+                      : project.deliveryLink ? 'Ask your client to acknowledge receipt.' : 'Save the original delivery link.'}
                   </p>
                   <Link
                     className="button primary"
                     href={`/projects/${id}?tab=delivery`}
                   >
-                    Continue delivery
+                    {project.deliveryLink ? 'Confirm delivery' : 'Continue delivery'}
                     <ArrowRight size={17} aria-hidden="true" />
                   </Link>
                 </>
@@ -217,9 +215,7 @@ export function ProjectDetail({
               Open a record to see its source.
             </p>
             <EvidenceList evidence={project.evidence} />
-            {!project.evidence.some(
-              (source) => source.kind === 'Acknowledgement',
-            ) && (
+            {!hasCurrentConfirmation(project) && (
               <div className="inline-attention compact">
                 <Info size={21} aria-hidden="true" />
                 <p>
@@ -231,6 +227,7 @@ export function ProjectDetail({
           </>
         )}
         {tab === 'response' && <ResponseBuilder key={project.id} project={project} />}
+        {tab === 'review' && <HandoverReview project={project}/>}
       </div>
     </>
   );

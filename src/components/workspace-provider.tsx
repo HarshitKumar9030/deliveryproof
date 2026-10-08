@@ -8,11 +8,12 @@ type Context = {
   theme: 'light' | 'dark'; toggleTheme: () => void; notice: string; notify: (text: string) => void;
   createProject: (input: Pick<Project, 'client' | 'title' | 'scope' | 'amount'>) => Promise<string>;
   updateProject: (id: string, changes: Partial<Project>, activityTitle: string, evidence?: Omit<Evidence, 'id' | 'date'>) => Promise<void>;
+  refreshProjects: () => Promise<void>;
 };
 const WorkspaceContext = createContext<Context | null>(null);
 export function WorkspaceProvider({ children, initialTheme = 'light', user }: { children: ReactNode; initialTheme?: 'light' | 'dark'; user: Account | null }) {
   const pathname = usePathname();
-  const publicPage = pathname === '/' || pathname.startsWith('/pay/') || pathname === '/signin' || pathname === '/signup';
+  const publicPage = pathname === '/' || pathname.startsWith('/pay/') || pathname.startsWith('/delivery/') || pathname === '/signin' || pathname === '/signup';
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -49,7 +50,13 @@ export function WorkspaceProvider({ children, initialTheme = 'light', user }: { 
     if (!response.ok) throw new Error(result.error || 'Project could not be saved');
     setProjects(current => current.map(project => project.id === id ? result : project));
   }
+  async function refreshProjects() {
+    const response = await fetch('/api/projects', { cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Unable to refresh projects');
+    setProjects(result.projects);
+  }
   const activity: Activity[] = projects.flatMap(project => project.evidence.map(e => ({ id: e.id, title: e.title, client: project.client, time: e.date, kind: e.kind }))).sort((a,b) => b.time.localeCompare(a.time)).slice(0,12);
-  return <WorkspaceContext.Provider value={{ projects, activity, user, loading, loadError, theme, toggleTheme, notice, notify, createProject, updateProject }}><div className="theme-root" data-theme={theme}>{children}</div></WorkspaceContext.Provider>;
+  return <WorkspaceContext.Provider value={{ projects, activity, user, loading, loadError, theme, toggleTheme, notice, notify, createProject, updateProject, refreshProjects }}><div className="theme-root" data-theme={theme}>{children}</div></WorkspaceContext.Provider>;
 }
 export function useWorkspace() { const context = useContext(WorkspaceContext); if (!context) throw new Error('Workspace provider required'); return context; }

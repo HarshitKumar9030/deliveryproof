@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BarChart3, CreditCard, ArrowUpRight } from 'lucide-react';
 import { money, type Project } from '@/domain/projects';
 import { CanvasAccent } from './canvas-accent';
+import { hasCurrentConfirmation } from '@/domain/handover';
 
 export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
   const [view, setView] = useState<'records' | 'payments'>('records');
@@ -63,7 +64,7 @@ export function WorkspaceStatistics({ projects }: { projects: Project[] }) {
 }
 
 export function ConfirmationStatistics({ projects }: { projects: Project[] }) {
-  const confirmed = projects.filter((project) => project.evidence.some((source) => source.kind === 'Acknowledgement')).length;
+  const confirmed = projects.filter(hasCurrentConfirmation).length;
   const ratio = projects.length ? confirmed / projects.length : 0;
   return (
     <section className="confirmation-statistics" aria-label="Client confirmations">

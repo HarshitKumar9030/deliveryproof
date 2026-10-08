@@ -23,6 +23,7 @@ export type Project = {
   paid: boolean;
   status: ProjectStatus;
   deliveryLink: string;
+  deliveryConfirmation?: { deliveryLink: string; name: string; confirmedAt: string; method: 'share-link' };
   evidence: Evidence[];
   responsePrepared: boolean;
   preparedPacket?: { draft: string; sources: Evidence[]; reviewedAt: string };
