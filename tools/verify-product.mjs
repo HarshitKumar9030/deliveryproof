@@ -57,6 +57,19 @@ try {
     assert.equal(checkout.status,200);assert.equal((await checkout.json()).amount,'125.00');
     const retried=await (await request('/api/projects/'+project.id+'/payment',first,'POST')).json();
     assert.equal(retried.paymentUrl,link.paymentUrl);
+    assert.equal((await request('/api/projects/'+project.id+'/payment?refresh=1',second,'POST')).status,404);
+    const refreshed=await request('/api/projects/'+project.id+'/payment?refresh=1',first,'POST');
+    assert.equal(refreshed.status,200,'A fresh unpaid sandbox order must be generated');
+    const freshLink=await refreshed.json();assert.notEqual(freshLink.paymentUrl,link.paymentUrl);
+    assert.equal((await fetch(link.paymentUrl.replace('/pay/','/api/pay/'))).status,404,'Previous app link must be invalidated');
+    assert.equal((await fetch(freshLink.paymentUrl.replace('/pay/','/api/pay/'))).status,200);
+    assert.equal((await (await request('/api/projects/'+project.id+'/payment',first,'POST')).json()).paymentUrl,freshLink.paymentUrl);
+    const testDb=(await client.connect()).db(process.env.MONGODB_DB || 'deliveryproof');
+    await testDb.collection('payments').updateOne({ownerId:ownerIds[0],projectId:project.id},{$set:{captureAttemptedAt:new Date()}});
+    assert.equal((await request('/api/projects/'+project.id+'/payment?refresh=1',first,'POST')).status,409,'Capture attempts must prevent replacement');
+    await testDb.collection('projects').updateOne({ownerId:ownerIds[0],id:project.id},{$set:{paid:true}});
+    assert.equal((await request('/api/projects/'+project.id+'/payment?refresh=1',first,'POST')).status,409,'Paid projects must not generate a new order');
+    console.log('Passed: fresh sandbox checkout, old app link invalidation, tenant isolation, stable retry, capture-attempt and paid-project refresh guards.');
     console.log('Passed: real sandbox OAuth, seller credential encryption, order creation, client payment page, stable payment-link retry. No buyer approval or capture was performed.');
   }
   console.log('Passed: public landing, protected redirects, auth-page redirects, signup/login, empty workspace, project persistence, tenant isolation, trusted-state rejection, delivery history, profile persistence.');

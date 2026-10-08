@@ -1,4 +1,10 @@
 import { z } from 'zod';
+export function verifyRefreshableOrder(input: unknown, orderId: string) {
+  const order = z.object({ id: z.string(), status: z.string() }).parse(input);
+  if (order.id !== orderId || !['CREATED', 'PAYER_ACTION_REQUIRED', 'VOIDED'].includes(order.status)) {
+    throw new Error('Complete or reconcile the existing payment before replacing it.');
+  }
+}
 export function verifyApprovedOrder(input: unknown, expected: { orderId: string; projectId: string; value: string }) {
   const order=z.object({id:z.string(),intent:z.literal('CAPTURE'),status:z.literal('APPROVED'),purchase_units:z.array(z.object({custom_id:z.string(),amount:z.object({currency_code:z.literal('USD'),value:z.string()})})).length(1)}).parse(input);
   const unit=order.purchase_units[0]!;

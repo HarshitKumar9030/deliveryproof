@@ -75,6 +75,9 @@ they are not automatically assigned to user accounts. Never commit secrets or cu
 2. In PayPal Developer, create a **business sandbox account** and a REST sandbox app linked to it.
    In DeliveryProof → Account, connect that app's Client ID and Secret.
 3. Create a project with a scope and USD amount. Open its overview and create a payment link.
+   Use **New payment** (refresh icon) to replace an unpaid checkout after changing sandbox
+   receiving preferences or when a link expires. Share the new link: the previous app link
+   stops working. Approved orders and capture attempts must be completed or reconciled first.
 4. Open the link in a separate browser profile. Approve using a **personal sandbox account**,
    return to the payment page, then choose **Complete & verify payment**. These are test funds.
 5. Check the business sandbox transaction history. Refresh the seller's project: its Payment
@@ -125,7 +128,7 @@ or acknowledgement status. Public payment links are random bearer URLs with seve
 | --- | --- |
 | Landing, animated auth UI, sign-up/sign-in/sign-out, profile settings | Working |
 | Account-isolated MongoDB projects, scope and delivery history | Working |
-| Seller sandbox connection and Orders v2 creation | Tested against PayPal sandbox, including stable-link retry |
+| Seller sandbox connection and Orders v2 creation | Tested against PayPal sandbox, including stable-link retry, fresh checkout generation, and old-link invalidation |
 | Client approval and verified capture | Implemented with validation tests; the full buyer approval/capture still needs a manual walkthrough |
 | Gemini selected-evidence analysis, citation checks, reviewed JSON packet | Working code path; requires a valid Gemini key/model and quota |
 | UploadThing | Authenticated project-scoped server endpoint; upload UI is still pending |

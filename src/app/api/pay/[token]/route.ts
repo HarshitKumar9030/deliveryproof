@@ -30,6 +30,13 @@ export async function POST(request:Request,context:{params:Promise<{token:string
     if(!takeLimit('capture:'+payment.orderId,6,60000)) return Response.json({error:'Please wait before trying again'},{status:429});
     const paypal=await merchant(payment.ownerId);
     let order=await paypal.getOrder(payment.orderId);
+    if(!['APPROVED','COMPLETED'].includes(order.status)) return Response.json({error:'Approve the payment in PayPal before completing it here.'},{status:409});
+    // Atomically exclude link replacement. Keep this marker even after a
+    // timeout: the same order is the only safe capture retry target.
+    const claimed=await db.collection('payments').updateOne({_id:payment._id,tokenHash:payment.tokenHash,orderId:payment.orderId,
+      $or:[{refreshUntil:{$exists:false}},{refreshUntil:{$lte:new Date()}}],
+    },{$set:{captureAttemptedAt:new Date()}});
+    if(!claimed.matchedCount) return Response.json({error:'This link was refreshed or is being updated. Ask the seller for the latest payment link.'},{status:409});
     if(order.status==='APPROVED') {
       verifyApprovedOrder(order,{orderId:payment.orderId,projectId:project.id,value:payment.value});
       order=await paypal.captureOrder(payment.orderId,payment.captureRequestId);
