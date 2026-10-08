@@ -140,6 +140,8 @@
 /* Flat surfaces with scale and restrained perspective. */
 .landing-art { --landing-reveal-scale:.97;position:relative;isolation:isolate; }
 .landing-mesh-shader { position:absolute;inset:6% -6%;width:112%;height:88%;z-index:-1;pointer-events:none; }
+.landing-final { position:relative;isolation:isolate;overflow:hidden; }
+.landing-final > .landing-shader-dither { inset:0; width:100%;height:100%;opacity:.6; }
 .landing-geometric { position:absolute;pointer-events:none;color:var(--muted);opacity:.17; }
 .landing-art > .landing-geometric { inset:14% 0 8%;width:100%;height:78%;z-index:-1;mask-image:radial-gradient(ellipse,black 15%,transparent 72%); }
 .landing-feature-grid article > .landing-geometric { inset:0 0 auto auto;width:54%;height:95px;opacity:.22;mask-image:linear-gradient(225deg,black,transparent 75%); }

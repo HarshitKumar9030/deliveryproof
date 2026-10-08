@@ -12,6 +12,11 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float time;
 uniform float ink;
+uniform float ditherMode;
+float bayer2(vec2 p) {
+  p = mod(p, 2.0);
+  return p.y < 1.0 ? p.x * 2.0 : 3.0 - p.x * 2.0;
+}
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution;
   vec2 point = uv - 0.5;
@@ -29,11 +34,20 @@ void main() {
   float edge = smoothstep(0.0, 0.2, uv.x) * smoothstep(0.0, 0.2, 1.0 - uv.x)
     * smoothstep(0.0, 0.18, uv.y) * smoothstep(0.0, 0.18, 1.0 - uv.y);
   float wave = 0.65 + 0.35 * sin(point.x * 4.0 + point.y * 3.0 + time * 0.4);
-  gl_FragColor = vec4(vec3(ink), line * edge * wave * 0.32);
+  // Ordered dithering shades a quiet spherical surface using dots, not a colour wash.
+  vec2 pixels = floor(gl_FragCoord.xy / 3.0);
+  float threshold = (4.0 * bayer2(pixels) + bayer2(floor(pixels / 2.0)) + 0.5) / 16.0;
+  float radius = length(point);
+  vec3 normal = normalize(vec3(point / 0.46, sqrt(max(0.0, 1.0 - radius * radius / 0.2116))));
+  vec3 light = normalize(vec3(sin(time * 0.12) * 0.3 - 0.6, 0.5, 0.8));
+  float tone = 0.12 + 0.5 * max(0.0, dot(normal, light));
+  float sphere = 1.0 - smoothstep(0.43, 0.46, radius);
+  float dither = step(threshold, tone) * sphere * 0.16;
+  gl_FragColor = vec4(vec3(ink), edge * mix(line * wave * 0.28, dither * 1.6, ditherMode));
 }
 `;
 
-export function LandingMeshShader({ dark }: { dark: boolean }) {
+export function LandingMeshShader({ dark, variant = 'mesh' }: { dark: boolean; variant?: 'mesh' | 'dither' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -81,6 +95,7 @@ export function LandingMeshShader({ dark }: { dark: boolean }) {
     const resolution = gl.getUniformLocation(program, 'resolution');
     const time = gl.getUniformLocation(program, 'time');
     gl.uniform1f(gl.getUniformLocation(program, 'ink'), dark ? 0.78 : 0.3);
+    gl.uniform1f(gl.getUniformLocation(program, 'ditherMode'), variant === 'dither' ? 1 : 0);
 
     let frame = 0;
     let visible = false;
@@ -138,7 +153,7 @@ export function LandingMeshShader({ dark }: { dark: boolean }) {
       gl.deleteShader(vertex);
       gl.deleteShader(fragment);
     };
-  }, [dark]);
+  }, [dark, variant]);
 
-  return <canvas ref={canvasRef} className="landing-mesh-shader" aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`landing-mesh-shader landing-shader-${variant}`} aria-hidden="true" />;
 }
