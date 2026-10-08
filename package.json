@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "setup:local": "node tools/setup-local.mjs",
+    "setup:local": "node scripts/setup-local.mjs",
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
@@ -17,10 +17,9 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "check": "npm run typecheck && npm test && npm run build:api && npm run build",
-    "db:local": "node tools/mongo-local.mjs",
-    "account:create": "node tools/create-account.mjs",
-    "test:product": "node tools/verify-product.mjs",
-    "test:handover": "node tools/verify-handover.mjs"
+    "db:local": "node scripts/mongo-local.mjs",
+    "test:product": "node tests/integration/product.mjs",
+    "test:handover": "node tests/integration/handover.mjs"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.5.1",

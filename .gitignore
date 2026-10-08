@@ -11,3 +11,6 @@ coverage/
 out/
 playwright-report/
 test-results/
+
+docs/
+tools/
