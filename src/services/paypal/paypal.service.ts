@@ -15,6 +15,7 @@ const DisputeSchema = z.object({
 }).passthrough();
 export type PayPalDispute = z.infer<typeof DisputeSchema>;
 type Fetch = typeof globalThis.fetch;
+class PayPalOrderUnavailable extends Error {}
 
 export class PayPalService {
   private readonly baseUrl = 'https://api-m.sandbox.paypal.com';
@@ -46,7 +47,15 @@ export class PayPalService {
       body: form ?? (body === undefined ? undefined : JSON.stringify(body)),
     });
     // Do not include provider response bodies or credentials in errors/logs.
-    if (!response.ok) throw new Error(`PayPal request failed (${response.status})`);
+    if (!response.ok) {
+      if (response.status === 404 && method === 'GET' && /^\/v2\/checkout\/orders\/[^/]+$/.test(path)) {
+        const error = z.object({ name: z.literal('RESOURCE_NOT_FOUND'),
+          details: z.array(z.object({ issue: z.literal('INVALID_RESOURCE_ID') })).min(1),
+        }).safeParse(await response.json().catch(() => null));
+        if (error.success) throw new PayPalOrderUnavailable('PayPal order is no longer available');
+      }
+      throw new Error(`PayPal request failed (${response.status})`);
+    }
     return response.status === 204 ? undefined : response.json();
   }
 
@@ -65,6 +74,16 @@ export class PayPalService {
 
   async getOrder(orderId: string) {
     return OrderSchema.parse(await this.request(`/v2/checkout/orders/${encodeURIComponent(orderId)}`));
+  }
+
+  /** Missing/expired orders may be replaced only if the caller has first
+   * excluded capture attempts. Authentication and provider failures still throw. */
+  async getOrderIfAvailable(orderId: string) {
+    try { return await this.getOrder(orderId); }
+    catch (error) {
+      if (error instanceof PayPalOrderUnavailable) return null;
+      throw error;
+    }
   }
 
   async checkConnection() { await this.accessToken(); }

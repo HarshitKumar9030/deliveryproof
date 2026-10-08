@@ -15,6 +15,12 @@ async function lookup(token:string) {
 export async function GET(_request:Request,context:{params:Promise<{token:string}>}) {
   try {
     const {token}=await context.params; const {payment,project}=await lookup(token);
+    if(!project.paid && payment.orderId) {
+      try {
+        const order=await (await merchant(payment.ownerId)).getOrderIfAvailable(payment.orderId);
+        if(!order) return Response.json({error:'This PayPal checkout has expired or is unavailable. Ask the seller to use New payment and share the fresh link.'},{status:410,headers:{'Cache-Control':'no-store'}});
+      } catch {return Response.json({error:'PayPal is unavailable right now. Reload this page to try again.'},{status:502,headers:{'Cache-Control':'no-store'}});}
+    }
     return Response.json({title:project.title,client:project.client,amount:payment.value,currency:'USD',paid:project.paid,approvalUrl:payment.approvalUrl,mode:'sandbox'},{headers:{'Cache-Control':'no-store'}});
   } catch { return Response.json({error:'This payment link is unavailable or has expired.'},{status:404}); }
 }

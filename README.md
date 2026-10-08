@@ -78,6 +78,9 @@ they are not automatically assigned to user accounts. Never commit secrets or cu
    Use **New payment** (refresh icon) to replace an unpaid checkout after changing sandbox
    receiving preferences or when a link expires. Share the new link: the previous app link
    stops working. Approved orders and capture attempts must be completed or reconciled first.
+   The app link lasts seven days, but PayPal orders normally have a three-hour checkout
+   window. We check order availability before showing approval and allow **New payment**
+   to recover a confirmed missing order only when no capture has been attempted.
 4. Open the link in a separate browser profile. Approve using a **personal sandbox account**,
    return to the payment page, then choose **Complete & verify payment**. These are test funds.
 5. Check the business sandbox transaction history. Refresh the seller's project: its Payment

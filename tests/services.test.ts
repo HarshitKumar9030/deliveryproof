@@ -51,6 +51,23 @@ test('invalid money is rejected before network access', async () => {
   }
 });
 
+test('only a confirmed missing order permits refresh recovery; other failures stay errors', async () => {
+  for(const scenario of [
+    {status:404,body:{name:'RESOURCE_NOT_FOUND',details:[{issue:'INVALID_RESOURCE_ID'}]},missing:true},
+    {status:403,body:{name:'NOT_AUTHORIZED'},missing:false},
+    {status:500,body:{name:'INTERNAL_SERVER_ERROR'},missing:false},
+    {status:404,body:{name:'unexpected-provider-body'},missing:false},
+  ]) {
+    const service=new PayPalService(config,async input=>String(input).endsWith('/token')
+      ?Response.json({access_token:'t',expires_in:3600})
+      :Response.json(scenario.body,{status:scenario.status}));
+    if(scenario.missing) {
+      assert.equal(await service.getOrderIfAvailable('OLD-ORDER'),null);
+      await assert.rejects(()=>service.getOrder('OLD-ORDER'));
+    } else await assert.rejects(()=>service.getOrderIfAvailable('OLD-ORDER'));
+  }
+});
+
 test('webhook verification fails closed on provider FAILURE', async () => {
   let verificationBody: Record<string, unknown> | undefined;
   const service = new PayPalService({ ...config, webhookId: 'WH-1' }, async (input, init) => {

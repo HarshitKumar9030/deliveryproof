@@ -42,7 +42,10 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
     payment=locked;
     try {
     if(refresh && payment.orderId) {
-      try {verifyRefreshableOrder(await paypal.getOrder(payment.orderId),payment.orderId);}
+      try {
+        const previousOrder=await paypal.getOrderIfAvailable(payment.orderId);
+        if(previousOrder) verifyRefreshableOrder(previousOrder,payment.orderId);
+      }
       catch {return Response.json({error:'The existing payment is approved, completed, or could not be checked. Complete or verify it before generating another.'},{status:409});}
       const freshToken=randomBytes(32).toString('base64url');
       payment=await payments.findOneAndUpdate({_id:payment._id,refreshLock:lockId,refreshUntil:{$gt:new Date()},captureAttemptedAt:{$exists:false}},{$set:{
