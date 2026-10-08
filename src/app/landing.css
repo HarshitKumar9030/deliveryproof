@@ -31,8 +31,11 @@
 .landing-flow-art svg { width:100%;height:100%; }
 .landing-flow-track { stroke:color-mix(in srgb,var(--muted) 13%,transparent);stroke-width:.7;stroke-dasharray:3 8; }
 .landing-flow-current { stroke:#af885040;stroke-width:1;stroke-dasharray:25 450;animation:landing-current 18s linear infinite; }
-.landing-header { position:sticky;top:0;z-index:20;transition:background-color 180ms,box-shadow 180ms;background:var(--canvas); }
-.landing-header[data-scrolled="true"] { background:color-mix(in srgb,var(--canvas) 94%,transparent);backdrop-filter:blur(16px);box-shadow:0 3px 20px #00000004; }
+.landing-header { position:sticky;top:0;z-index:20;isolation:isolate;background:transparent;transition:transform var(--duration-fast) var(--ease-smooth-out); }
+.landing-nav-surface { position:absolute;inset:0;margin-inline:auto;width:100%;z-index:-1;background:var(--canvas);border-radius:0;transition:width var(--duration-fast) var(--ease-smooth-out),border-radius var(--duration-fast) var(--ease-smooth-out),background-color var(--duration-fast),box-shadow var(--duration-fast); }
+.landing-header[data-scrolled="true"] { transform:translateY(10px); }
+.landing-header[data-scrolled="true"] .landing-nav-surface { width:min(1160px,calc(100% - 24px));border-radius:26px;background:color-mix(in srgb,var(--canvas) 78%,transparent);box-shadow:0 8px 28px #0000000b,inset 0 1px 0 color-mix(in srgb,var(--text) 5%,transparent); }
+@media(prefers-reduced-motion:reduce){.landing-header,.landing-nav-surface{transition:none;}}
 .landing-nav { max-width:1200px;padding:23px 35px; }
 .landing-nav-links { display:flex;gap:28px;margin-left:40px; }
 .landing-nav-links a { font-size:11px;color:var(--muted);position:relative;transition:color 120ms; }
@@ -136,6 +139,7 @@
 
 /* Flat surfaces with scale and restrained perspective. */
 .landing-art { --landing-reveal-scale:.97;position:relative;isolation:isolate; }
+.landing-mesh-shader { position:absolute;inset:6% -6%;width:112%;height:88%;z-index:-1;pointer-events:none; }
 .landing-geometric { position:absolute;pointer-events:none;color:var(--muted);opacity:.17; }
 .landing-art > .landing-geometric { inset:14% 0 8%;width:100%;height:78%;z-index:-1;mask-image:radial-gradient(ellipse,black 15%,transparent 72%); }
 .landing-feature-grid article > .landing-geometric { inset:0 0 auto auto;width:54%;height:95px;opacity:.22;mask-image:linear-gradient(225deg,black,transparent 75%); }

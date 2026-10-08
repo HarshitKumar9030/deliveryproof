@@ -5,6 +5,7 @@
 @import './workspace-styles.css';
 @import './statistics.css';
 @import './auth.css';
+/* Public landing page and floating navigation. */
 @import './landing.css';
 
 @theme inline {
