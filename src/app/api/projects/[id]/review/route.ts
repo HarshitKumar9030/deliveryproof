@@ -7,9 +7,11 @@ import { hasCurrentConfirmation } from '@/domain/handover';
 import type { Project } from '@/domain/projects';
 import type { EvidenceRecord } from '@/domain/evidence';
 import { createHash } from 'node:crypto';
+import { readArtifact, assertReviewBudget } from '@/services/storage/artifacts';
+import type { Artifact } from '@/domain/artifacts';
 
 function fingerprint(project: Project) {
-  return createHash('sha256').update(JSON.stringify({ scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmation: project.deliveryConfirmation, evidence: project.evidence })).digest('hex');
+  return createHash('sha256').update(JSON.stringify({ scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmation: project.deliveryConfirmation, evidence: project.evidence, artifacts: project.artifacts })).digest('hex');
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
@@ -39,13 +41,21 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     if (!project) return Response.json({ error: 'Project unavailable' }, { status: 404 });
     const scope = { ownerId: session.user.id, projectId: id };
     const records: EvidenceRecord[] = project.evidence.map(e => ({ ...scope, id: e.id, kind: e.kind.toLowerCase() as EvidenceRecord['kind'], occurredAt: e.date, text: e.excerpt, sourceRef: `project:${id}:${e.id}` }));
-    const review = await createServices().ai().reviewHandover(scope, { title: project.title, scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmed: hasCurrentConfirmation(project) }, records);
+    assertReviewBudget(project.artifacts || []);
+    const files = [];
+    for (const artifact of project.artifacts || []) {
+      const original = await db.collection<Artifact & { key: string; ownerId: string; projectId: string }>('artifacts').findOne({ ...scope, id: artifact.id, sha256: artifact.sha256 });
+      if (!original) throw new Error('Original file missing');
+      files.push(await readArtifact(artifact, original.key));
+    }
+    const review = await createServices().ai().reviewHandover(scope, { title: project.title, scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmed: hasCurrentConfirmation(project) }, records, files);
     const current = await db.collection<Project & { ownerId: string }>('projects').findOne({ id, ownerId: session.user.id });
     if (!current || fingerprint(current) !== fingerprint(project)) return Response.json({ error: 'Project records changed during review. Refresh and run it again.' }, { status: 409 });
     const createdAt = new Date().toISOString();
-    await db.collection('handoverReviews').insertOne({ ...scope, review, fingerprint: fingerprint(project), sourceIds: records.map(r => r.id), createdAt });
+    await db.collection('handoverReviews').insertOne({ ...scope, review, fingerprint: fingerprint(project), sourceIds: records.map(r => r.id), inspectedFiles: files.map(({ content: _content, ...file }) => file), createdAt });
     return Response.json({ review, createdAt, sourceIds: records.map(r => r.id) }, { headers: { 'Cache-Control': 'no-store' } });
-  } catch {
+  } catch (error) {
+    console.error('Delivery review failed:', error instanceof Error ? error.name : 'Unknown error');
     return Response.json({ error: 'Delivery review could not complete. Check the AI configuration and try again.' }, { status: 502 });
   }
 }

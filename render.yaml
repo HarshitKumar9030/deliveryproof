@@ -1,26 +1,31 @@
 services:
   - type: web
-    name: deliveryproof-api
+    name: deliveryproof
     runtime: node
-    buildCommand: npm ci && npm run build:api
-    startCommand: npm run start:api
-    healthCheckPath: /health
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "24"
-      - key: PAYPAL_CLIENT_ID
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: APP_ENCRYPTION_KEY
         sync: false
-      - key: PAYPAL_CLIENT_SECRET
+      - key: MONGODB_URI
         sync: false
-      - key: PAYPAL_WEBHOOK_ID
+      - key: MONGODB_DB
+        value: deliveryproof
+      - key: APP_ORIGIN
         sync: false
-      - key: ELASTIC_URL
-        sync: false
-      - key: ELASTIC_API_KEY
+      - key: AUTH_URL
         sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
         sync: false
-# Local file storage is development-only. Add object storage and a durable
-# database/queue before enabling evidence ingestion on Render's ephemeral disk.
+      - key: UPLOADTHING_TOKEN
+        sync: false

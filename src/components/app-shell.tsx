@@ -22,6 +22,7 @@ import { SlidingPill, Toast } from './motion';
 import { CommandPalette } from './command-palette';
 import { Dialog } from './ui';
 import { NavigationGlyph } from './navigation-glyph';
+import { UsageGuide } from './usage-guide';
 const navigation = [
   { href: '/dashboard', label: 'Overview', icon: House },
   { href: '/projects', label: 'Projects', icon: Folder },
@@ -141,6 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span>{current}</span>
           </div>
           <div className="toolbar flex items-center gap-3.5">
+            <UsageGuide />
             <button
               className="icon-button theme-toggle"
               onClick={toggleTheme}

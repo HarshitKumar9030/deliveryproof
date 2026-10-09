@@ -14,6 +14,7 @@ import { Dialog } from './ui';
 
 export const evidenceIcons: Record<EvidenceKind, typeof FileText> = {
   Agreement: FileText,
+  Artifact: FileText,
   Payment: CreditCard,
   Delivery: Link2,
   Access: MousePointer2,

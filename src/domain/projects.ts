@@ -1,3 +1,4 @@
+import type { Artifact } from './artifacts.ts';
 export type ProjectStatus =
   | 'needs-link'
   | 'ready'
@@ -6,7 +7,7 @@ export type ProjectStatus =
   | 'complete'
   | 'awaiting-payment';
 export type EvidenceKind =
-  'Agreement' | 'Payment' | 'Delivery' | 'Access' | 'Acknowledgement';
+  'Agreement' | 'Payment' | 'Delivery' | 'Access' | 'Acknowledgement' | 'Artifact';
 export type Evidence = {
   id: string;
   kind: EvidenceKind;
@@ -23,6 +24,7 @@ export type Project = {
   paid: boolean;
   status: ProjectStatus;
   deliveryLink: string;
+  artifacts?: Artifact[];
   deliveryConfirmation?: { deliveryLink: string; name: string; confirmedAt: string; method: 'share-link' };
   evidence: Evidence[];
   responsePrepared: boolean;

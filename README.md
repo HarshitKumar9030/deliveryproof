@@ -34,8 +34,17 @@ source snapshots. Valid citations still need human review; they do not guarantee
 delivery checkpoints, maps them to original evidence, flags partial or missing documentation,
 and proposes next actions in the workspace. Agreement-only claims cannot count as supported
 delivery. Its suggested client message can be reviewed and copied. Reviews persist in MongoDB
-and are marked stale when the scope, payment, delivery, or evidence changes. It does not open
-delivery URLs or inspect file contents.
+and are marked stale when the scope, payment, delivery, or evidence changes. It reads uploaded
+PDFs, images and numbered text, comparing their contents with the agreed requirements. Findings
+link to original files and cite a page, line or visual observation. External delivery URLs are not opened.
+
+**Original files stay private.** Upload review files from the AI review tab.
+UploadThing stores AES-256-GCM encrypted originals; MongoDB holds their metadata and SHA-256 fingerprints.
+The server checks ownership and hashes before downloading or sending originals to the model.
+Limits: eight files per project, 4 MB per file, 12 MB total; PDFs up to 25 pages and UTF-8 text
+up to 256 KB. Supported formats: PDF, PNG, JPEG, WebP, TXT, MD, CSV, JSON and SVG source.
+SVG is inspected as text, never rendered as active markup. Uploads preserve evidence; they do not
+replace the external delivery link or record client receipt. All files are sent only when you run review.
 
 **Clients can acknowledge receipt.** In Delivery, generate a seven-day confirmation link and
 share it with the client. Their self-declared name and timestamp become an append-only
@@ -82,6 +91,13 @@ The seller connects PayPal **inside Account settings**, rather than sharing a gl
 across every app user. Existing server PayPal environment credentials are used by service adapters;
 they are not automatically assigned to user accounts. Never commit secrets or customer evidence.
 
+## In-app help
+
+Choose **How to use** in the workspace toolbar. It explains the seller and client roles, the
+four-step workflow and how to test it as a judge. New accounts also see a **Start here** card.
+The judge guide includes a downloadable sample file with an intentionally missing scope item.
+AI uploads are for review; the Delivery tab holds the client-facing URL and receipt link.
+
 ## Judge walkthrough: one project, one payment, one evidence review
 
 1. Visit the landing page and create an account. New workspaces start empty.
@@ -98,8 +114,9 @@ they are not automatically assigned to user accounts. Never commit secrets or cu
    return to the payment page, then choose **Complete & verify payment**. These are test funds.
 5. Check the business sandbox transaction history. Refresh the seller's project: its Payment
    evidence now contains the verified capture reference.
-6. Run **AI review** from the project overview. Expand its scope checkpoints and inspect the cited
-   sources and missing documentation. Follow a suggested action to Delivery and save a real HTTPS link.
+6. In **AI review**, upload a real PDF or text deliverable that intentionally lacks one agreed item.
+   Choose **Check files with AI**, expand its checkpoints and inspect the page/line citations and missing item.
+   Follow a suggested action to Delivery and save a real HTTPS handover link.
 7. Generate a confirmation link, open it in a separate browser profile, and acknowledge receipt.
    Refresh confirmation status in the seller's Delivery tab. Inspect the new Acknowledgement source.
 8. Open Response, select records, and describe a test concern such as “The client says the files
@@ -150,16 +167,36 @@ or acknowledgement status. Public payment links are random bearer URLs with seve
 | Seller sandbox connection and Orders v2 creation | Tested against PayPal sandbox, including stable-link retry, fresh checkout generation, and old-link invalidation |
 | Client approval and verified capture | Implemented with validation tests; the full buyer approval/capture still needs a manual walkthrough |
 | Gemini selected-evidence analysis, citation checks, reviewed JSON packet | Working code path; requires a valid Gemini key/model and quota |
-| UploadThing | Authenticated project-scoped server endpoint; upload UI is still pending |
+| UploadThing | Encrypted original uploads, project ownership checks, integrity-checked downloads and file-review UI |
 | Elastic, a hackathon sponsor | Account/project-filtered service adapter and tests; indexing and search UI are pending |
 | Client acknowledgement | Working shared-link flow with explicit receipt, timestamp, ownership checks, idempotency, and changed-link invalidation; link-holder identity is self-declared |
 | Gemini handover checkpoints and next actions | Working; structured, cited scope review with persisted results and stale-review detection |
-| Independent client identity verification and file-content inspection | Pending |
+| File-content inspection | Implemented with page/line citations and original-file validation |
+| Independent client identity verification | Pending |
 | Dispute import, verified webhooks, refunds, PDF export, PayPal evidence submission | Pending |
 | Email verification, password recovery, production merchant onboarding | Pending |
 
-The repo includes a separate service health API (`npm run dev:api`, port 3001). The Render Blueprint
-currently deploys that API only, not the complete Next.js product. No hosted demo is claimed.
+## Host the complete app on Render
+
+The [Render Blueprint](render.yaml) builds and runs the full Next.js app, including auth and API
+routes. `/api/health` checks MongoDB connectivity. No local disk is needed for uploaded originals.
+
+1. Create a hosted MongoDB database and a dedicated database user. Allow the Render service's
+   outbound IP addresses in MongoDB network access. Do not use the local `127.0.0.1` URI on Render.
+2. In Render, choose **New → Blueprint**, connect this repository and review `render.yaml`.
+3. Supply `MONGODB_URI`, `GEMINI_API_KEY`, `GEMINI_MODEL` and `UPLOADTHING_TOKEN` in Render.
+   Use the full UploadThing app token, not an individual API key. The free storage tier works: only encrypted bytes leave the server.
+4. Set `APP_ORIGIN` and `AUTH_URL` to the exact HTTPS service URL with no trailing slash.
+   Render generates `AUTH_SECRET`. Generate `APP_ENCRYPTION_KEY` as 64 hexadecimal characters
+   (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) and keep it stable.
+   If migrating existing merchant records, retain their original encryption key instead.
+5. Deploy, verify `/api/health` returns 200, create an account and connect a PayPal sandbox app
+   inside Account. Complete the walkthrough below with distinct seller and buyer accounts.
+
+The blueprint explicitly uses the free plan; expect cold starts after inactivity. Choose an
+always-on plan in Render if needed for judging. No hosted URL is claimed until deployment succeeds.
+The separate `dev:api` service is optional and is not needed for the product.
+Deployment reference: [Render's Next.js guide](https://render.com/docs/deploy-nextjs-app).
 
 ## Verification
 
@@ -169,6 +206,8 @@ npm run test:product
 npm run test:handover
 # Optional: one real Gemini request using the configured key and model.
 npm run test:handover -- --ai
+# Also exercise private UploadThing storage, original download and real PDF inspection.
+npm run test:handover -- --files --ai
 ```
 
 `check` runs TypeScript, unit tests, service compilation, and the Next.js production build.
@@ -191,4 +230,4 @@ fallback. No SF Pro font files are redistributed.
 The hackathon asks for a working PayPal + AI prototype, runnable instructions or a hosted demo,
 a public source repository with an open-source license, and a public demo video under three minutes.
 Before submitting, complete the real sandbox walkthrough, add the video URL, confirm repository
-visibility, and choose an open-source license. A license has not been selected on the owner's behalf.
+visibility, and add the deployed URL. Source code is available under the [MIT license](LICENSE).

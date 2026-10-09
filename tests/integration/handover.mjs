@@ -2,6 +2,8 @@ import nextEnv from '@next/env';
 import { MongoClient } from 'mongodb';
 import { randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { UTApi } from 'uploadthing/server';
 
 nextEnv.loadEnvConfig(process.cwd());
 const base = process.env.APP_ORIGIN || 'http://localhost:3000';
@@ -65,11 +67,33 @@ try {
   assert.equal((await request(path + '/confirmation', seller, 'POST')).status, 201);
   assert.equal((await request(path + '/review', other, 'POST')).status, 404);
   assert.equal((await request(path + '/review')).status, 401);
+  if (process.argv.includes('--files')) {
+    const pdf = await PDFDocument.create(); const page = pdf.addPage([600, 400]);
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+    page.drawText('ACME brand delivery', { x: 40, y: 340, size: 24, font });
+    page.drawText('Primary colour: #224466', { x: 40, y: 290, size: 16, font });
+    page.drawText('Typography: not included in this delivery.', { x: 40, y: 250, size: 16, font });
+    const bytes = await pdf.save();
+    const form = new FormData(); form.set('file', new File([bytes], 'brand-delivery.pdf', { type: 'application/pdf' }));
+    const upload = (cookie) => fetch(base + path + '/artifacts', { method: 'POST', headers: { cookie, origin: base }, body: form });
+    assert.equal((await upload(other)).status, 404);
+    const uploaded = await upload(seller); const result = await uploaded.json();
+    assert.equal(uploaded.status, 201, result.error);
+    const filePath = path + '/artifacts/' + result.artifact.id;
+    assert.equal((await request(filePath)).status, 401);
+    assert.equal((await request(filePath, other)).status, 404);
+    const downloaded = await request(filePath, seller);
+    assert.equal(downloaded.status, 200);
+    assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()), bytes);
+    assert.equal((await (await request('/api/projects', seller)).json()).projects.find(p => p.id === project.id).paid, false);
+    console.log('Private PDF upload, exact original download, ownership isolation and unchanged payment state passed.');
+  }
   if (process.argv.includes('--ai')) {
     const reviewed = await request(path + '/review', seller, 'POST');
     assert.equal(reviewed.status, 200, 'Live Gemini review did not succeed');
     const { review } = await reviewed.json();
     assert.ok(review.checkpoints.length > 0);
+    if (process.argv.includes('--files')) assert.ok(review.checkpoints.some(item => item.fileCitations.length > 0), 'Actual PDF observations must cite a page');
     console.log(`Live Gemini produced ${review.checkpoints.length} cited checkpoints and ${review.nextActions.length} actions.`);
     assert.equal((await (await request(path + '/review', seller)).json()).stale, false);
     await request(path, seller, 'PATCH', { deliveryLink: 'https://files.example.test/logo-v3' });
@@ -79,7 +103,9 @@ try {
 } finally {
   await client.connect();
   const db = client.db(process.env.MONGODB_DB || 'deliveryproof');
-  for (const collection of ['projects', 'confirmationLinks', 'handoverReviews']) await db.collection(collection).deleteMany({ ownerId: { $in: owners } });
+  const stored = await db.collection('artifacts').find({ ownerId: { $in: owners } }).toArray();
+  if (stored.length) await new UTApi().deleteFiles(stored.map(file => file.key));
+  for (const collection of ['projects', 'confirmationLinks', 'handoverReviews', 'artifacts']) await db.collection(collection).deleteMany({ ownerId: { $in: owners } });
   await db.collection('users').deleteMany({ email: { $in: emails } });
   await db.collection('login_limits').deleteMany({ email: { $in: emails } });
   await client.close();

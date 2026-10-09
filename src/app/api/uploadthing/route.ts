@@ -1,4 +1,2 @@
-import { createRouteHandler } from 'uploadthing/next';
-import { uploadRouter } from './core';
-export const { GET, POST } = createRouteHandler({ router: uploadRouter });
-export const runtime = 'nodejs';
+// Uploads now pass through project ownership, format, size and hash validation.
+export function POST() { return Response.json({ error: 'Use the project file upload endpoint.' }, { status: 410 }); }

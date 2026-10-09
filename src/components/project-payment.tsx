@@ -27,6 +27,7 @@ export function ProjectPayment({ projectId }: { projectId: string }) {
     catch { setError('Copy the URL from Payment help below.'); }
   }
   return <div className="grid gap-3" aria-busy={!!busy}>
+    <p className="text-xs leading-relaxed text-muted">{url ? 'Copy this link and send it to your client. They approve in PayPal, then complete payment on the checkout page.' : 'Create a checkout for this project’s amount. Connect your seller sandbox app in Account first.'}</p>
     {url ? <div className="flex items-center justify-between gap-3 rounded-2xl bg-paper px-4 py-3">
       <span className="flex min-w-0 items-center gap-2 text-xs"><CreditCard size={16} className="shrink-0" aria-hidden="true"/>Checkout ready</span>
       <div className="flex shrink-0 items-center gap-1">

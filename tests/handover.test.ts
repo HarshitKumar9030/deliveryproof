@@ -7,7 +7,7 @@ import type { EvidenceRecord } from '../src/domain/evidence.ts';
 
 const scope = { ownerId: 'seller-1', projectId: 'project-1' };
 const record: EvidenceRecord = { ...scope, id: 'scope-1', kind: 'agreement', occurredAt: '2026-10-08T10:00:00Z', text: 'Deliver three logo exports.', sourceRef: 'project:1' };
-const review = { summary: 'Exports are not documented.', checkpoints: [{ requirement: 'Three logo exports', status: 'missing', explanation: 'Only scope is recorded.', evidenceIds: ['scope-1'] }], nextActions: [{ action: 'delivery', reason: 'Preserve the export handover.' }], confirmationMessage: 'Please confirm receipt of the three logo exports, or tell us what is missing.' };
+const review = { summary: 'Exports are not documented.', checkpoints: [{ requirement: 'Three logo exports', status: 'missing', explanation: 'Only scope is recorded.', evidenceIds: ['scope-1'], fileCitations: [] }], nextActions: [{ action: 'delivery', reason: 'Preserve the export handover.' }], confirmationMessage: 'Please confirm receipt of the three logo exports, or tell us what is missing.' };
 
 test('handover rejects invented citations and agreement-only delivery claims', () => {
   assert.deepEqual(validateHandoverReview(review, [record]), review);

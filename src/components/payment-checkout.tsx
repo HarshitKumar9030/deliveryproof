@@ -28,8 +28,8 @@ export function PaymentCheckout({token}:{token:string}) {
             <span className="text-xs font-medium text-muted">USD</span>
           </div>
           {!payment.paid&&<div className="grid gap-3">
-            <a className="button primary w-full justify-center gap-2" href={payment.approvalUrl} title="Step 1: Sign in to PayPal sandbox and approve this order.">Approve in PayPal<ArrowUpRight size={15} aria-hidden="true"/></a>
-            <button className="button secondary w-full justify-center" disabled={busy} onClick={capture} title="Step 2: After PayPal approval, capture and verify the payment.">{busy?'Verifying payment…':'Complete & verify payment'}</button>
+            <a className="button primary w-full justify-center gap-2" href={payment.approvalUrl} title="Step 1: Sign in to PayPal sandbox and approve this order.">1. Approve in PayPal<ArrowUpRight size={15} aria-hidden="true"/></a>
+            <button className="button secondary w-full justify-center" disabled={busy} onClick={capture} title="Step 2: After PayPal approval, capture and verify the payment.">{busy?'Verifying payment…':'2. Complete & verify payment'}</button>
           </div>}
           {payment.paid&&<p role="status" className="text-sm text-muted">Your PayPal payment has been verified.</p>}
         </>:!error&&<p role="status" className="mt-6 text-sm text-muted">Loading payment…</p>}
@@ -37,6 +37,7 @@ export function PaymentCheckout({token}:{token:string}) {
       </section>
 
       <aside aria-label="Sandbox payment help">
+        {payment && !payment.paid && <p className="mb-3 px-2 text-xs leading-relaxed text-muted">Approve in PayPal, then return to this page and complete payment. The seller sees payment only after step 2 succeeds.</p>}
         <details className="squircle rounded-[24px] bg-paper px-5 sm:px-6">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-xs [&::-webkit-details-marker]:hidden">
             <span className="flex min-w-0 items-center gap-2 text-muted"><Info size={15} className="shrink-0" aria-hidden="true"/><span>Sandbox · Test funds only</span></span>

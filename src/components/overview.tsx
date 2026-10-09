@@ -15,9 +15,11 @@ import { money, type EvidenceKind } from '@/domain/projects';
 import { ProjectList } from './project-list';
 import { SummaryCards } from './summary-cards';
 import { WorkspaceStatistics, ConfirmationStatistics } from './workspace-statistics';
+import { UsageGuide } from './usage-guide';
 
 const icons: Record<EvidenceKind, typeof FileText> = {
   Agreement: FileText,
+  Artifact: FileText,
   Payment: CreditCard,
   Delivery: FileText,
   Access: ArrowUpRight,
@@ -57,6 +59,7 @@ export function Overview() {
         </div>
         <span className="date caption">{new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', year: 'numeric' })}</span>
       </div>
+      {!projects.length && <section className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-paper p-6"><div className="max-w-xl"><span className="text-[9px] uppercase tracking-[0.18em] text-muted">Start here</span><h2 className="mt-2 text-xl font-semibold tracking-tight">Your first project, step by step.</h2><p className="mt-2 text-sm leading-relaxed text-muted">Connect PayPal in Account, then use New project. We’ll help you collect payment, check the deliverables with AI and request a client receipt.</p></div><UsageGuide prominent/></section>}
       <SummaryCards />
       <div className="grid items-start gap-[18px] min-[1001px]:grid-cols-[minmax(0,1fr)_270px] min-[1001px]:max-[1150px]:grid-cols-[minmax(0,1fr)_230px]">
         <div className="min-w-0">

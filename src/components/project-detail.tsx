@@ -133,7 +133,7 @@ export function ProjectDetail({
                 <h2>The agreed work.</h2>
                 <p>{project.scope}</p>
               </section>
-              <HandoverReview project={project}/>
+              <HandoverReview project={project} compact/>
               <section>
                 <div className="section-heading">
                   <h2>Preserved records</h2>

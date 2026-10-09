@@ -1,0 +1,12 @@
+NORTHSTAR STUDIO — BRAND GUIDE
+
+Primary colour palette
+Primary: #224466
+Background: #F5F3EE
+Body text: #24241F
+
+Typography recommendations
+Not included in this delivery.
+
+This sample intentionally omits one agreed item so you can inspect how the
+AI identifies a missing requirement and cites the original text.
