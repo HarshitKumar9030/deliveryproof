@@ -13,6 +13,14 @@ const DisputeSchema = z.object({
   seller_response_due_date: z.string().optional(),
   links: z.array(z.object({ href: z.string(), rel: z.string(), method: z.string().optional() })).optional(),
 }).passthrough();
+const AuthorizationSchema = z.object({
+  id: z.string(), status: z.string(), expiration_time: z.string().optional(),
+  amount: z.object({ currency_code: z.string(), value: z.string() }).optional(),
+}).passthrough();
+const CaptureSchema = z.object({
+  id: z.string(), status: z.string(),
+  amount: z.object({ currency_code: z.string(), value: z.string() }).optional(),
+}).passthrough();
 export type PayPalDispute = z.infer<typeof DisputeSchema>;
 type Fetch = typeof globalThis.fetch;
 class PayPalOrderUnavailable extends Error {}
@@ -38,8 +46,9 @@ export class PayPalService {
     return data.access_token;
   }
 
-  private async request(path: string, method = 'GET', body?: unknown, requestId?: string, form?: FormData): Promise<unknown> {
+  private async request(path: string, method = 'GET', body?: unknown, requestId?: string, form?: FormData, representation = false): Promise<unknown> {
     const headers: Record<string, string> = { Authorization: `Bearer ${await this.accessToken()}` };
+    if (representation) headers.Prefer = 'return=representation';
     if (requestId) headers['PayPal-Request-Id'] = z.string().min(1).max(38).parse(requestId);
     if (!form) headers['Content-Type'] = 'application/json';
     const response = await this.fetcher(`${this.baseUrl}${path}`, {
@@ -59,11 +68,11 @@ export class PayPalService {
     return response.status === 204 ? undefined : response.json();
   }
 
-  async createOrder(input: { projectId: string; currency: string; value: string; requestId: string; returnUrl?: string; cancelUrl?: string }) {
+  async createOrder(input: { projectId: string; currency: string; value: string; requestId: string; returnUrl?: string; cancelUrl?: string; intent?: 'CAPTURE' | 'AUTHORIZE' }) {
     const money = MoneySchema.parse(input);
     z.string().min(1).max(127).parse(input.projectId);
     return OrderSchema.parse(await this.request('/v2/checkout/orders', 'POST', {
-      intent: 'CAPTURE', purchase_units: [{ custom_id: input.projectId,
+      intent: input.intent ?? 'CAPTURE', purchase_units: [{ custom_id: input.projectId,
         amount: { currency_code: money.currency, value: money.value } }],
       ...(input.returnUrl && input.cancelUrl ? { payment_source: { paypal: { experience_context: {
         return_url: z.url().parse(input.returnUrl), cancel_url: z.url().parse(input.cancelUrl),
@@ -90,6 +99,29 @@ export class PayPalService {
 
   async captureOrder(orderId: string, requestId: string) {
     return OrderSchema.parse(await this.request(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, 'POST', {}, requestId));
+  }
+
+  /** Places a hold on the approved buyer funds without moving them. */
+  async authorizeOrder(orderId: string, requestId: string) {
+    return OrderSchema.parse(await this.request(`/v2/checkout/orders/${encodeURIComponent(orderId)}/authorize`, 'POST', {}, requestId, undefined, true));
+  }
+
+  async getAuthorization(authorizationId: string) {
+    return AuthorizationSchema.parse(await this.request(`/v2/payments/authorizations/${encodeURIComponent(authorizationId)}`));
+  }
+
+  /** Moves held funds to the seller. The request ID must be persisted so a retry cannot capture twice. */
+  async captureAuthorization(authorizationId: string, input: { requestId: string; value: string; note: string }) {
+    const money = MoneySchema.parse({ currency: 'USD', value: input.value });
+    return CaptureSchema.parse(await this.request(`/v2/payments/authorizations/${encodeURIComponent(authorizationId)}/capture`, 'POST', {
+      amount: { currency_code: money.currency, value: money.value }, final_capture: true,
+      note_to_payer: z.string().min(1).max(255).parse(input.note),
+    }, input.requestId, undefined, true));
+  }
+
+  /** Releases the hold back to the buyer. */
+  async voidAuthorization(authorizationId: string, requestId: string) {
+    await this.request(`/v2/payments/authorizations/${encodeURIComponent(authorizationId)}/void`, 'POST', undefined, requestId);
   }
 
   async getDispute(disputeId: string): Promise<PayPalDispute> {

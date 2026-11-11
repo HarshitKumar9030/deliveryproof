@@ -56,7 +56,7 @@ export function WorkspaceProvider({ children, initialTheme = 'light', user }: { 
     if (!response.ok) throw new Error(result.error || 'Unable to refresh projects');
     setProjects(result.projects);
   }
-  const activity: Activity[] = projects.flatMap(project => project.evidence.map(e => ({ id: e.id, title: e.title, client: project.client, time: e.date, kind: e.kind }))).sort((a,b) => b.time.localeCompare(a.time)).slice(0,12);
+  const activity: Activity[] = projects.flatMap(project => project.evidence.map(e => ({ id: e.id, title: e.title, client: project.client, time: e.date, kind: e.kind }))).sort((a, b) => b.time.localeCompare(a.time)).slice(0, 12);
   return <WorkspaceContext.Provider value={{ projects, activity, user, loading, loadError, theme, toggleTheme, notice, notify, createProject, updateProject, refreshProjects }}><div className="theme-root" data-theme={theme}>{children}</div></WorkspaceContext.Provider>;
 }
 export function useWorkspace() { const context = useContext(WorkspaceContext); if (!context) throw new Error('Workspace provider required'); return context; }

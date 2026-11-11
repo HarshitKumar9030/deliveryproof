@@ -9,7 +9,7 @@ type PaymentRecord = {
   createRequestId:string; captureRequestId:string; state:string; value:string;
   expiresAt:Date; orderId?:string; approvalUrl?:string;
   refreshLock?:string; refreshUntil?:Date; refreshedAt?:Date; captureAttemptedAt?:Date;
-  previousOrders?:{orderId:string;replacedAt:Date}[];
+  previousOrders?:{orderId:string;replacedAt:Date}[]; intent?:'CAPTURE'|'AUTHORIZE';
 };
 export async function POST(request:Request,context:{params:Promise<{id:string}>}) {
   if(!sameOrigin(request)) return Response.json({error:'Invalid origin'},{status:403});
@@ -20,6 +20,10 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
     const db=await database(); const project=await db.collection('projects').findOne({id,ownerId:session.user.id});
     if(!project) return Response.json({error:'Project unavailable'},{status:404});
     if(project.paid) return Response.json({error:'This project is already paid'},{status:409});
+    if(project.hold) return Response.json({error:'The client has already authorized a held payment for this project.'},{status:409});
+    const params=new URL(request.url).searchParams;
+    // Proof-gated payments authorize now and capture only after the release gate passes.
+    const intent=params.get('hold')==='1'?'AUTHORIZE':'CAPTURE';
     const paypal=await merchant(session.user.id);
     const token=randomBytes(32).toString('base64url');
     const payments=db.collection<PaymentRecord>('payments');
@@ -27,10 +31,10 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
     await payments.createIndex({tokenHash:1},{unique:true});
     let payment=await payments.findOneAndUpdate({ownerId:session.user.id,projectId:id},{$setOnInsert:{
       ownerId:session.user.id,projectId:id,tokenHash:createHash('sha256').update(token).digest('hex'),token:encrypt(token),
-      createRequestId:randomUUID(),captureRequestId:randomUUID(),state:'pending',value:project.amount.toFixed(2),expiresAt:new Date(Date.now()+7*86400000),
+      createRequestId:randomUUID(),captureRequestId:randomUUID(),state:'pending',intent,value:project.amount.toFixed(2),expiresAt:new Date(Date.now()+7*86400000),
     }},{upsert:true,returnDocument:'after'});
     if(!payment) throw new Error('Payment unavailable');
-    const refresh=new URL(request.url).searchParams.get('refresh')==='1';
+    const refresh=params.get('refresh')==='1';
     const lockId=randomUUID();
     // Capture claims the same document before talking to PayPal. Once attempted,
     // its outcome must be reconciled rather than replaced with a second order.
@@ -50,7 +54,7 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
       const freshToken=randomBytes(32).toString('base64url');
       payment=await payments.findOneAndUpdate({_id:payment._id,refreshLock:lockId,refreshUntil:{$gt:new Date()},captureAttemptedAt:{$exists:false}},{$set:{
         tokenHash:createHash('sha256').update(freshToken).digest('hex'),token:encrypt(freshToken),
-        createRequestId:randomUUID(),captureRequestId:randomUUID(),value:project.amount.toFixed(2),
+        createRequestId:randomUUID(),captureRequestId:randomUUID(),value:project.amount.toFixed(2),intent,
         expiresAt:new Date(Date.now()+7*86400000),refreshedAt:new Date(),
       },$unset:{orderId:'',approvalUrl:''},$push:{previousOrders:{orderId:payment.orderId,replacedAt:new Date()}}},{returnDocument:'after'});
       if(!payment) throw new Error('Payment changed');
@@ -65,13 +69,13 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
     const origin=process.env.APP_ORIGIN || request.headers.get('origin')!;
     const paymentUrl=origin+'/pay/'+decrypt(payment.token);
     if(!payment.orderId) {
-      const order=await paypal.createOrder({projectId:id,currency:'USD',value:payment.value,requestId:payment.createRequestId,returnUrl:paymentUrl+'?approved=1',cancelUrl:paymentUrl+'?cancelled=1'});
+      const order=await paypal.createOrder({projectId:id,currency:'USD',value:payment.value,requestId:payment.createRequestId,intent:payment.intent??'CAPTURE',returnUrl:paymentUrl+'?approved=1',cancelUrl:paymentUrl+'?cancelled=1'});
       const approvalUrl=order.links?.find(link=>link.rel==='payer-action'||link.rel==='approve')?.href;
       if(!approvalUrl || !['www.sandbox.paypal.com','sandbox.paypal.com'].includes(new URL(approvalUrl).hostname)) throw new Error('PayPal approval URL unavailable');
       const saved=await payments.updateOne({_id:payment._id,refreshLock:lockId},{$set:{orderId:order.id,approvalUrl}});
       if(!saved.matchedCount) throw new Error('Payment changed');
     }
-    return Response.json({paymentUrl,mode:'sandbox'});
+    return Response.json({paymentUrl,mode:'sandbox',intent:payment.intent??'CAPTURE'});
     } finally {await payments.updateOne({_id:locked._id,refreshLock:lockId},{$unset:{refreshLock:'',refreshUntil:''}});}
   } catch { return Response.json({error:'Could not create payment. Connect your PayPal sandbox app in Account settings, then retry.'},{status:502}); }
 }

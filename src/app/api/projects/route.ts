@@ -10,7 +10,7 @@ export async function GET() {
   if (!session?.user?.id) return Response.json({ error: 'Sign in required' }, { status: 401 });
   try {
     const db = await database();
-    const projects = await db.collection('projects').find({ ownerId: session.user.id }, { projection: { _id: 0, ownerId: 0 } }).sort({ createdAt: -1 }).limit(200).toArray();
+    const projects = await db.collection('projects').find({ ownerId: session.user.id }, { projection: { _id: 0, ownerId: 0, 'hold.releaseRequestId': 0, 'hold.returnRequestId': 0 } }).sort({ createdAt: -1 }).limit(200).toArray();
     return Response.json({ projects, activity: [] }, { headers: { 'Cache-Control': 'no-store' } });
   } catch { return Response.json({ error: 'Database unavailable. Start npm run db:local.' }, { status: 503 }); }
 }

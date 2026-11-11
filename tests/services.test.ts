@@ -183,3 +183,30 @@ test('storage keeps content-addressed originals and blocks path traversal / cros
     await rm(target, { recursive: true, force: true });
   }
 });
+
+test('proof-gated payments authorize, capture and void with persisted request IDs', async () => {
+  const calls: { url: string; init?: RequestInit }[] = [];
+  const service = new PayPalService(config, async (input, init) => {
+    const url = String(input); calls.push({ url, init });
+    if (url.endsWith('/token')) return Response.json({ access_token: 't', expires_in: 3600 });
+    if (url.endsWith('/void')) return new Response(null, { status: 204 });
+    if (url.endsWith('/authorizations/AUTH1/capture')) return Response.json({ id: 'CAP1', status: 'COMPLETED', amount: { currency_code: 'USD', value: '125.00' } }, { status: 201 });
+    return Response.json({ id: 'ORDER1', status: 'COMPLETED' }, { status: 201 });
+  });
+  await service.createOrder({ projectId: 'p', currency: 'USD', value: '125.00', requestId: 'create-1', intent: 'AUTHORIZE' });
+  assert.equal(JSON.parse(calls[1]!.init?.body as string).intent, 'AUTHORIZE');
+  await service.authorizeOrder('ORDER1', 'auth-1');
+  const authorize = calls.at(-1)!;
+  assert.ok(authorize.url.endsWith('/v2/checkout/orders/ORDER1/authorize'));
+  assert.equal(new Headers(authorize.init?.headers).get('PayPal-Request-Id'), 'auth-1');
+  assert.equal(new Headers(authorize.init?.headers).get('Prefer'), 'return=representation');
+  const capture = await service.captureAuthorization('AUTH1', { requestId: 'release-1', value: '125.00', note: 'Released' });
+  assert.equal(capture.id, 'CAP1');
+  const body = JSON.parse(calls.at(-1)!.init?.body as string);
+  assert.deepEqual(body.amount, { currency_code: 'USD', value: '125.00' });
+  assert.equal(body.final_capture, true);
+  assert.equal(new Headers(calls.at(-1)!.init?.headers).get('PayPal-Request-Id'), 'release-1');
+  await service.voidAuthorization('AUTH1', 'return-1');
+  assert.ok(calls.at(-1)!.url.endsWith('/v2/payments/authorizations/AUTH1/void'));
+  await assert.rejects(() => service.captureAuthorization('AUTH1', { requestId: 'r', value: '0.00', note: 'x' }));
+});

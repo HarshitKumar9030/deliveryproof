@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, PackageCheck, ShieldCheck } from 'lucide-react';
 
-type Delivery = { title: string; client: string; deliveryLink: string; confirmedAt: string | null };
+type Delivery = { title: string; client: string; deliveryLink: string; confirmedAt: string | null; held?: boolean };
 export function ClientDelivery({ token }: { token: string }) {
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [name, setName] = useState('');
@@ -37,6 +37,7 @@ export function ClientDelivery({ token }: { token: string }) {
     <h1 className="text-[28px] font-semibold tracking-tight">{delivery?.confirmedAt ? 'Receipt recorded.' : 'Confirm you received the files.'}</h1>
     {delivery ? <><p className="mt-3 text-sm">{delivery.title}</p><p className="mt-1 text-xs text-muted">For {delivery.client}</p>
       {!delivery.confirmedAt && <p className="mt-4 text-xs leading-relaxed text-muted">First open the delivered files. Then return here, enter your name and confirm receipt.</p>}
+      {!delivery.confirmedAt && delivery.held && <p className="mt-3 rounded-2xl bg-surface p-3 text-xs leading-relaxed text-muted">Your payment is held by PayPal. Confirming receipt is one of the conditions for releasing it to the seller; the delivery must also pass a scope check. Only confirm once you have the files.</p>}
       <a className="button secondary mt-6 w-full justify-center gap-2" href={delivery.deliveryLink} target="_blank" rel="noreferrer">{delivery.confirmedAt ? 'Open delivered files' : '1. Open delivered files'}<ArrowUpRight size={16} aria-hidden="true"/></a>
       {delivery.confirmedAt ? <p className="mt-6 text-sm text-muted" role="status">Receipt acknowledged on {new Date(delivery.confirmedAt).toLocaleDateString()}. Your record has been saved.</p> : <form onSubmit={confirm} className="mt-6 grid gap-5">
         <label className="grid gap-2 text-xs">Your name<input required minLength={2} maxLength={100} autoComplete="name" value={name} onChange={event => setName(event.target.value)}/></label>

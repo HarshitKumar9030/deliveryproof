@@ -23,6 +23,7 @@ export function Status({ project }: { project: Project }) {
     >
       {project.responsePrepared && project.status === 'dispute'
         ? 'Draft prepared'
+        : project.status === 'awaiting-payment' && project.hold?.state === 'held' ? 'Funds held'
         : statusLabels[project.status]}
     </span>
   );

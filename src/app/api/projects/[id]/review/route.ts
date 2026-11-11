@@ -6,13 +6,9 @@ import { createServices } from '@/services/registry';
 import { hasCurrentConfirmation } from '@/domain/handover';
 import type { Project } from '@/domain/projects';
 import type { EvidenceRecord } from '@/domain/evidence';
-import { createHash } from 'node:crypto';
 import { readArtifact, assertReviewBudget } from '@/services/storage/artifacts';
 import type { Artifact } from '@/domain/artifacts';
-
-function fingerprint(project: Project) {
-  return createHash('sha256').update(JSON.stringify({ scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmation: project.deliveryConfirmation, evidence: project.evidence, artifacts: project.artifacts })).digest('hex');
-}
+import { reviewFingerprint as fingerprint } from '@/services/workspace/review-fingerprint';
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -48,7 +44,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       if (!original) throw new Error('Original file missing');
       files.push(await readArtifact(artifact, original.key));
     }
-    const review = await createServices().ai().reviewHandover(scope, { title: project.title, scope: project.scope, paid: project.paid, deliveryLink: project.deliveryLink, confirmed: hasCurrentConfirmation(project) }, records, files);
+    const review = await createServices().ai().reviewHandover(scope, { title: project.title, scope: project.scope, paid: project.paid || project.hold?.state === 'held', deliveryLink: project.deliveryLink, confirmed: hasCurrentConfirmation(project) }, records, files);
     const current = await db.collection<Project & { ownerId: string }>('projects').findOne({ id, ownerId: session.user.id });
     if (!current || fingerprint(current) !== fingerprint(project)) return Response.json({ error: 'Project records changed during review. Refresh and run it again.' }, { status: 409 });
     const createdAt = new Date().toISOString();

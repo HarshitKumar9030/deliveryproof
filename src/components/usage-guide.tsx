@@ -5,7 +5,7 @@ import { CircleHelp, CreditCard, ScanText, Send, CheckCircle2, ArrowRight, Downl
 import { Dialog } from './ui';
 
 const steps = [
-  { icon: CreditCard, title: 'Get paid', text: 'Connect your PayPal sandbox app in Account. Create a project with a clear scope and USD amount, then share its payment link. The buyer approves in PayPal, returns to the checkout page and chooses Complete & verify payment.' },
+  { icon: CreditCard, title: 'Get paid', text: 'Connect your PayPal sandbox app in Account. Create a project with a clear scope and USD amount, keep Hold until delivery is proven ticked, then share its payment link. The buyer approves in PayPal and is returned to the checkout, which places the hold automatically. You release the funds once receipt and the AI scope check pass.' },
   { icon: ScanText, title: 'Check the work with AI', text: 'Open the project’s AI review tab. Upload the actual deliverables and choose Check files with AI. Expand each result to see what is present, what is missing, and the page or line behind the finding.' },
   { icon: Send, title: 'Share the final delivery', text: 'Open Delivery and save a link to the final files in your existing file host. Make sure your client can access it. Files uploaded for AI review are kept in your workspace; they are not automatically sent to the client.' },
   { icon: CheckCircle2, title: 'Ask the client to confirm receipt', text: 'In Delivery, create and copy a receipt link. Share it with the client. They open it, check the files and confirm receipt. Refresh the project to see their acknowledgement beside the verified payment.' },

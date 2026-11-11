@@ -1,4 +1,5 @@
 import type { Artifact } from './artifacts.ts';
+import type { PaymentHold } from './release.ts';
 export type ProjectStatus =
   | 'needs-link'
   | 'ready'
@@ -22,6 +23,8 @@ export type Project = {
   scope: string;
   amount: number;
   paid: boolean;
+  /** Proof-gated payment: PayPal holds the client's funds until the release gate passes. */
+  hold?: PaymentHold;
   status: ProjectStatus;
   deliveryLink: string;
   artifacts?: Artifact[];

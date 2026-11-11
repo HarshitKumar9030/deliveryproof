@@ -6,6 +6,32 @@ Built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/).
 DeliveryProof gives freelancers and small studios a record of what was agreed, what was paid,
 and what was handed over—then helps them review that evidence when a delivery is questioned.
 
+## The headline feature: proof-gated payouts
+
+Most freelance disputes start because one side moves first: the client pays and hopes, or the seller
+delivers and hopes. DeliveryProof lets **PayPal hold the money while AI checks the proof**.
+
+1. The seller creates a **held** payment link. The client approves in PayPal and DeliveryProof calls
+   Orders v2 `/authorize`: the funds are reserved on the client's PayPal account but not captured.
+2. The seller hands over the work and uploads the deliverables. The client acknowledges receipt.
+3. Gemini reads the actual files (PDF pages, text lines, images) against the agreed scope and returns
+   cited checkpoints: supported, partial or missing.
+4. A deterministic **release gate** checks five conditions: funds held and unexpired, work handed over,
+   client receipt for the current delivery, a review that is current for the latest records, and **zero
+   missing scope items**. Only then can the seller press **Release**, which captures the authorization
+   (`/v2/payments/authorizations/{id}/capture`, `final_capture: true`).
+5. If the work cannot be completed, **Return funds** voids the authorization; the client is never charged.
+
+The AI judges the evidence; plain code decides whether money moves. A model output alone can never
+release funds, a stale review blocks release, and every PayPal call reuses a persisted
+`PayPal-Request-Id`, so a retry after a timeout cannot capture twice. Both the hold and the release are
+appended to the project's evidence trail, so if a dispute happens anyway the packet already shows the
+client's receipt and the scope check that preceded payment. Policy: [`src/domain/release.ts`](src/domain/release.ts),
+route: [`src/app/api/projects/[id]/release/route.ts`](src/app/api/projects/%5Bid%5D/release/route.ts).
+
+PayPal authorizations have a three-day honor period and stay valid for up to 29 days, which suits
+short freelance projects. Immediate capture is still available by unticking **Hold until delivery is proven**.
+
 ## The problem
 
 A PayPal capture proves a payment happened. It does not explain the scope of a design project,
@@ -103,7 +129,8 @@ AI uploads are for review; the Delivery tab holds the client-facing URL and rece
 1. Visit the landing page and create an account. New workspaces start empty.
 2. In PayPal Developer, create a **business sandbox account** and a REST sandbox app linked to it.
    In DeliveryProof → Account, connect that app's Client ID and Secret.
-3. Create a project with a scope and USD amount. Open its overview and create a payment link.
+3. Create a project with a scope and USD amount. Open its overview, keep **Hold until delivery is proven**
+   ticked and create a payment link.
    Use **New payment** (refresh icon) to replace an unpaid checkout after changing sandbox
    receiving preferences or when a link expires. Share the new link: the previous app link
    stops working. Approved orders and capture attempts must be completed or reconciled first.
@@ -111,14 +138,17 @@ AI uploads are for review; the Delivery tab holds the client-facing URL and rece
    window. We check order availability before showing approval and allow **New payment**
    to recover a confirmed missing order only when no capture has been attempted.
 4. Open the link in a separate browser profile. Approve using a **personal sandbox account**,
-   return to the payment page, then choose **Complete & verify payment**. These are test funds.
-5. Check the business sandbox transaction history. Refresh the seller's project: its Payment
-   evidence now contains the verified capture reference.
+   return to the payment page, then choose **Authorize & hold payment**. These are test funds.
+5. Refresh the seller's project. The Up next panel now shows the **release gate**: funds held, with
+   the other four checks still open and **Release** locked.
 6. In **AI review**, upload a real PDF or text deliverable that intentionally lacks one agreed item.
    Choose **Check files with AI**, expand its checkpoints and inspect the page/line citations and missing item.
    Follow a suggested action to Delivery and save a real HTTPS handover link.
 7. Generate a confirmation link, open it in a separate browser profile, and acknowledge receipt.
    Refresh confirmation status in the seller's Delivery tab. Inspect the new Acknowledgement source.
+   Back on Overview the gate still blocks: the review is stale and an item was missing. Upload the
+   missing item, re-run the AI check, and once no item is missing choose **Release**. Check the business
+   sandbox account: the capture appears only now. (Or choose **Return funds** to void the hold.)
 8. Open Response, select records, and describe a test concern such as “The client says the files
    were not received.” Run Gemini. Inspect its sources and missing acknowledgement.
 9. Review the draft, preserve the gaps, prepare the packet, and download the JSON.
@@ -165,6 +195,7 @@ or acknowledgement status. Public payment links are random bearer URLs with seve
 | Landing, animated auth UI, sign-up/sign-in/sign-out, profile settings | Working |
 | Account-isolated MongoDB projects, scope and delivery history | Working |
 | Seller sandbox connection and Orders v2 creation | Tested against PayPal sandbox, including stable-link retry, fresh checkout generation, and old-link invalidation |
+| Proof-gated payouts (authorize → AI release gate → capture or void) | Implemented with policy, verification and mocked-provider tests; needs a manual sandbox walkthrough |
 | Client approval and verified capture | Implemented with validation tests; the full buyer approval/capture still needs a manual walkthrough |
 | Gemini selected-evidence analysis, citation checks, reviewed JSON packet | Working code path; requires a valid Gemini key/model and quota |
 | UploadThing | Encrypted original uploads, project ownership checks, integrity-checked downloads and file-review UI |

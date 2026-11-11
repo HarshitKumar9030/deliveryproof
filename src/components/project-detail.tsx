@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Check, Info, FolderSearch, CreditCard, PackageCheck, FileCheck2, ScanText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Info, FolderSearch, CreditCard, PackageCheck, FileCheck2, ScanText, LockKeyhole } from 'lucide-react';
 import { useWorkspace } from '@/components/workspace-provider';
 import { money, type Project } from '@/domain/projects';
 import { ClientMark, Status, EmptyState, TextLink } from './ui';
@@ -11,6 +11,7 @@ import { ResponseBuilder } from './response-builder';
 import { SlidingPill } from './motion';
 import { ProjectPayment } from './project-payment';
 import { HandoverReview } from './handover-review';
+import { ReleaseGate } from './release-gate';
 import { hasCurrentConfirmation } from '@/domain/handover';
 
 const tabs = ['overview', 'delivery', 'evidence', 'review', 'response'] as const;
@@ -21,7 +22,7 @@ function Progress({ project }: { project: Project }) {
       label: 'Agreement',
       done: project.evidence.some((source) => source.kind === 'Agreement'),
     },
-    { label: 'Payment', done: project.paid },
+    { label: project.hold && !project.paid ? 'Funds held' : 'Payment', done: project.paid || project.hold?.state === 'held' || project.hold?.state === 'releasing' },
     {
       label: 'Delivery',
       done: !!project.deliveryLink && project.status !== 'needs-link',
@@ -96,7 +97,7 @@ export function ProjectDetail({
         <div className="detail-payment">
           <strong>{money(project.amount)}</strong>
           <span>
-            {project.paid ? 'Payment received' : 'Awaiting payment'} · USD
+            {project.paid ? 'Payment received' : project.hold?.state === 'returned' ? 'Returned to client' : project.hold ? 'Held by PayPal' : 'Awaiting payment'} · USD
           </span>
         </div>
       </div>
@@ -145,8 +146,10 @@ export function ProjectDetail({
               </section>
             </div>
             <aside className="next-panel detail-next !rounded-[24px]">
-              <div className="flex items-center justify-between"><h2>Up next</h2>{!project.paid ? <CreditCard size={18} className="text-accent" aria-hidden="true"/> : project.status === 'dispute' ? <FileCheck2 size={18} className="text-accent" aria-hidden="true"/> : <PackageCheck size={18} className="text-accent" aria-hidden="true"/>}</div>
-              {!project.paid ? (
+              <div className="flex items-center justify-between"><h2>Up next</h2>{!project.paid && project.hold ? <LockKeyhole size={18} className="text-accent" aria-hidden="true"/> : !project.paid ? <CreditCard size={18} className="text-accent" aria-hidden="true"/> : project.status === 'dispute' ? <FileCheck2 size={18} className="text-accent" aria-hidden="true"/> : <PackageCheck size={18} className="text-accent" aria-hidden="true"/>}</div>
+              {!project.paid && project.hold ? (
+                <ReleaseGate project={project}/>
+              ) : !project.paid ? (
                 <><h3>Get paid.</h3><p>Share a secure PayPal checkout.</p><ProjectPayment projectId={id}/><Link href={`/projects/${id}?tab=delivery`} className="mt-4 inline-flex items-center gap-2 text-xs text-muted"><PackageCheck size={15} aria-hidden="true"/>{project.deliveryLink ? 'Request delivery confirmation' : 'Add delivery'}<ArrowRight size={13} aria-hidden="true"/></Link></>
               ) : project.status === 'dispute' ? (
                 <>

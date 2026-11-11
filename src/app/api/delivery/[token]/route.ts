@@ -24,7 +24,7 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
     const result = await resolve((await context.params).token);
     if (!result) return reply({ error: 'This link expired or the delivery changed. Ask the sender for a new link.' }, 404);
     const { project } = result;
-    return reply({ title: project.title, client: project.client, deliveryLink: project.deliveryLink, confirmedAt: hasCurrentConfirmation(project) ? project.deliveryConfirmation!.confirmedAt : null });
+    return reply({ title: project.title, client: project.client, deliveryLink: project.deliveryLink, confirmedAt: hasCurrentConfirmation(project) ? project.deliveryConfirmation!.confirmedAt : null, held: project.hold?.state === 'held' });
   } catch { return reply({ error: 'Unable to load this delivery.' }, 503); }
 }
 
