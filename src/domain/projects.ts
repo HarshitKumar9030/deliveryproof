@@ -1,5 +1,5 @@
 import type { Artifact } from './artifacts.ts';
-import type { PaymentHold } from './release.ts';
+import type { ClientConcern, PaymentHold } from './release.ts';
 export type ProjectStatus =
   | 'needs-link'
   | 'ready'
@@ -8,7 +8,7 @@ export type ProjectStatus =
   | 'complete'
   | 'awaiting-payment';
 export type EvidenceKind =
-  'Agreement' | 'Payment' | 'Delivery' | 'Access' | 'Acknowledgement' | 'Artifact';
+  'Agreement' | 'Payment' | 'Delivery' | 'Access' | 'Acknowledgement' | 'Artifact' | 'Message';
 export type Evidence = {
   id: string;
   kind: EvidenceKind;
@@ -25,6 +25,8 @@ export type Project = {
   paid: boolean;
   /** Proof-gated payment: PayPal holds the client's funds until the release gate passes. */
   hold?: PaymentHold;
+  /** A client-raised problem. While open it blocks release; only the client can resolve it. */
+  concern?: ClientConcern;
   status: ProjectStatus;
   deliveryLink: string;
   artifacts?: Artifact[];

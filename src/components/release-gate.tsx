@@ -7,7 +7,8 @@ import type { Project } from '@/domain/projects';
 import type { Gate, GateId, PaymentHold } from '@/domain/release';
 
 type GateState = { hold: PaymentHold | null; gates: Gate[]; canRelease: boolean; warnings: string[]; dispute: boolean };
-const fixes: Record<GateId, string> = { funds: 'overview', delivery: 'delivery', receipt: 'delivery', review: 'review', scope: 'review' };
+// Gates the seller can act on; funds and an open client concern are not the seller's to clear.
+const fixes: Partial<Record<GateId, string>> = { delivery: 'delivery', receipt: 'delivery', review: 'review', scope: 'review' };
 
 /** Seller view of a proof-gated payment: funds stay with PayPal until every gate passes. */
 export function ReleaseGate({ project }: { project: Project }) {
@@ -25,7 +26,7 @@ export function ReleaseGate({ project }: { project: Project }) {
     } catch (failure) { if (!signal?.aborted) setError(failure instanceof Error ? failure.message : 'Unable to check the release gate'); }
   }, [project.id]);
   // Re-evaluate whenever project records change (receipt, review, delivery).
-  const version = `${project.evidence.length}:${project.deliveryLink}:${project.deliveryConfirmation?.confirmedAt ?? ''}:${project.hold?.state ?? ''}`;
+  const version = `${project.evidence.length}:${project.deliveryLink}:${project.deliveryConfirmation?.confirmedAt ?? ''}:${project.hold?.state ?? ''}:${project.concern?.state ?? ''}`;
   useEffect(() => { const controller = new AbortController(); load(controller.signal); return () => controller.abort(); }, [load, version]);
 
   async function act(action: 'release' | 'return') {
@@ -44,7 +45,7 @@ export function ReleaseGate({ project }: { project: Project }) {
   }
 
   const passed = state?.gates.filter(g => g.ok).length ?? 0;
-  const total = state?.gates.length ?? 5;
+  const total = state?.gates.length ?? 6;
   const value = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(project.hold?.value ?? project.amount));
   if (project.hold?.state === 'returned') return <div className="grid gap-2"><h3>Funds returned.</h3><p>The PayPal authorization was voided; the client was not charged.</p></div>;
   return <div className="grid gap-3" aria-busy={!state || !!busy}>
@@ -61,7 +62,7 @@ export function ReleaseGate({ project }: { project: Project }) {
           <strong className="block text-xs font-medium">{gate.label}</strong>
           <span className="mt-0.5 block break-words text-[11px] leading-relaxed text-muted">{gate.detail}</span>
         </div>
-        {!gate.ok && gate.id !== 'funds' && <Link href={`/projects/${project.id}?tab=${fixes[gate.id]}`} className="shrink-0 self-center text-muted" aria-label={`Fix: ${gate.label}`} title="Go fix this"><ArrowRight size={14}/></Link>}
+        {!gate.ok && fixes[gate.id] && <Link href={`/projects/${project.id}?tab=${fixes[gate.id]}`} className="shrink-0 self-center text-muted" aria-label={`Fix: ${gate.label}`} title="Go fix this"><ArrowRight size={14}/></Link>}
       </li>) : <li className="flex items-center gap-2 text-xs text-muted"><LoaderCircle size={14} className="animate-spin" aria-hidden="true"/>Checking the gate…</li>}
     </ol>
     {state?.warnings.map(warning => <p key={warning} className="flex items-start gap-2 text-[11px] leading-relaxed text-muted"><TriangleAlert size={13} className="mt-0.5 shrink-0" aria-hidden="true"/>{warning}</p>)}

@@ -9,6 +9,7 @@ import {
   FileText,
   Link2,
   MessageSquare,
+  MessageSquareWarning,
 } from 'lucide-react';
 import { useWorkspace } from '@/components/workspace-provider';
 import { money, type EvidenceKind } from '@/domain/projects';
@@ -24,6 +25,7 @@ const icons: Record<EvidenceKind, typeof FileText> = {
   Delivery: FileText,
   Access: ArrowUpRight,
   Acknowledgement: CheckCircle2,
+  Message: MessageSquareWarning,
 };
 export function Overview() {
   const { projects, activity, user } = useWorkspace();

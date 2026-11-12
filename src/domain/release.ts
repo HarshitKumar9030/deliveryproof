@@ -13,7 +13,14 @@ export type PaymentHold = {
   captureId?: string;
 };
 const usd = (value: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
-export type GateId = 'funds' | 'delivery' | 'receipt' | 'review' | 'scope';
+export type ClientConcern = {
+  state: 'open' | 'resolved';
+  name: string;
+  text: string;
+  raisedAt: string;
+  resolvedAt?: string;
+};
+export type GateId = 'funds' | 'delivery' | 'receipt' | 'concern' | 'review' | 'scope';
 export type Gate = { id: GateId; label: string; ok: boolean; detail: string };
 export type ReleaseDecision = { gates: Gate[]; canRelease: boolean; warnings: string[] };
 
@@ -28,6 +35,7 @@ export function evaluateRelease(input: {
   confirmed: boolean;
   review: HandoverReview | null;
   reviewStale: boolean;
+  concern?: ClientConcern;
   now?: Date;
 }): ReleaseDecision {
   const now = input.now ?? new Date();
@@ -55,6 +63,13 @@ export function evaluateRelease(input: {
       id: 'receipt', label: 'Client acknowledged receipt',
       ok: input.confirmed,
       detail: input.confirmed ? 'The client confirmed receipt of the current delivery.' : 'Send a confirmation link and wait for the client to acknowledge.',
+    },
+    {
+      id: 'concern', label: 'No open client concern',
+      ok: input.concern?.state !== 'open',
+      detail: input.concern?.state === 'open'
+        ? `${input.concern.name} raised a concern: "${input.concern.text}" Only the client can resolve it; you can still return the funds.`
+        : input.concern ? 'The client resolved their concern.' : 'The client has not raised a concern.',
     },
     {
       id: 'review', label: 'AI review is current',

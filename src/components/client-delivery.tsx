@@ -1,9 +1,53 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, CheckCircle2, PackageCheck, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, PackageCheck, ShieldCheck, TriangleAlert } from 'lucide-react';
 
-type Delivery = { title: string; client: string; deliveryLink: string; confirmedAt: string | null; held?: boolean };
+type Concern = { state: 'open' | 'resolved'; text: string; raisedAt: string };
+type Delivery = { title: string; client: string; deliveryLink: string; confirmedAt: string | null; held?: boolean; concern?: Concern | null };
+
+/** While PayPal holds the payment, the client can pause release by reporting a problem, and lift it later. */
+function ConcernPanel({ token, delivery, onChange }: { token: string; delivery: Delivery; onChange: (concern: Concern) => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  async function send(body: object) {
+    if (busy) return;
+    setBusy(true); setError('');
+    try {
+      const response = await fetch(`/api/delivery/${token}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      onChange(result.concern); setOpen(false); setText('');
+    } catch (failure) { setError(failure instanceof Error ? failure.message : 'Unable to save your concern.'); }
+    finally { setBusy(false); }
+  }
+  const concern = delivery.concern;
+  if (concern?.state === 'open') return <div className="mt-6 grid gap-3 rounded-2xl bg-surface p-4 text-xs leading-relaxed" role="status">
+    <strong className="flex items-center gap-2 font-medium"><TriangleAlert size={14} aria-hidden="true"/>Payment paused by your concern</strong>
+    <p className="text-muted">“{concern.text}”</p>
+    <p className="text-muted">The seller cannot release your payment while this is open. Once it is sorted, lift the pause here.</p>
+    <button className="button secondary justify-center" disabled={busy} onClick={() => send({ action: 'resolve' })}>{busy ? 'Saving…' : 'My concern is resolved'}</button>
+    {error && <p className="form-error" role="alert">{error}</p>}
+  </div>;
+  if (!delivery.held) return concern?.state === 'resolved' ? <p className="mt-6 text-xs text-muted">You resolved your concern.</p> : null;
+  return <div className="mt-6 text-xs">
+    {concern?.state === 'resolved' && <p className="mb-3 text-muted">You resolved your earlier concern.</p>}
+    {!open ? <button className="text-button inline-flex items-center gap-2" onClick={() => setOpen(true)}><TriangleAlert size={14} aria-hidden="true"/>Something wrong? Pause the payment</button>
+      : <form className="grid gap-4 rounded-2xl bg-surface p-4" onSubmit={event => { event.preventDefault(); send({ action: 'concern', name, text }); }}>
+        <p className="leading-relaxed text-muted">Describe what is missing or wrong. The seller sees your words, the payment stays held, and the AI review takes your report into account.</p>
+        <label className="grid gap-2">Your name<input required minLength={2} maxLength={100} autoComplete="name" value={name} onChange={event => setName(event.target.value)}/></label>
+        <label className="grid gap-2">What is wrong?<textarea required minLength={10} maxLength={1000} rows={4} value={text} onChange={event => setText(event.target.value)} placeholder="For example: the brand guide has no typography section."/></label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="button primary" disabled={busy || name.trim().length < 2 || text.trim().length < 10}>{busy ? 'Sending…' : 'Pause payment'}</button>
+          <button type="button" className="text-button" onClick={() => setOpen(false)}>Cancel</button>
+        </div>
+        {error && <p className="form-error" role="alert">{error}</p>}
+      </form>}
+  </div>;
+}
 export function ClientDelivery({ token }: { token: string }) {
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [name, setName] = useState('');
@@ -44,7 +88,8 @@ export function ClientDelivery({ token }: { token: string }) {
         <label className="flex items-start gap-3 text-xs leading-relaxed"><input type="checkbox" className="mt-1 shrink-0 accent-[var(--accent)]" checked={received} onChange={event => setReceived(event.target.checked)} required/><span>I received the delivery linked above. This records receipt, not satisfaction or approval of the work.</span></label>
         <button className="button primary w-full justify-center gap-2" disabled={busy || !received || name.trim().length < 2}><CheckCircle2 size={16} aria-hidden="true"/>{busy ? 'Recording…' : '2. Confirm receipt'}</button>
         <p className="text-[11px] leading-relaxed text-muted">Your name and the time of acknowledgement will be shared with the sender. No payment is made here.</p>
-      </form>}</> : !error && <p className="mt-5 text-sm text-muted" role="status">Loading delivery…</p>}
+      </form>}
+      <ConcernPanel token={token} delivery={delivery} onChange={concern => setDelivery(current => current ? { ...current, concern } : current)}/></> : !error && <p className="mt-5 text-sm text-muted" role="status">Loading delivery…</p>}
     {error && <p className="form-error mt-5" role="alert">{error}</p>}
   </section></main>;
 }

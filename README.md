@@ -16,11 +16,13 @@ delivers and hopes. DeliveryProof lets **PayPal hold the money while AI checks t
 2. The seller hands over the work and uploads the deliverables. The client acknowledges receipt.
 3. Gemini reads the actual files (PDF pages, text lines, images) against the agreed scope and returns
    cited checkpoints: supported, partial or missing.
-4. A deterministic **release gate** checks five conditions: funds held and unexpired, work handed over,
-   client receipt for the current delivery, a review that is current for the latest records, and **zero
-   missing scope items**. Only then can the seller press **Release**, which captures the authorization
+4. A deterministic **release gate** checks six conditions: funds held and unexpired, work handed over,
+   client receipt for the current delivery, **no open client concern**, a review that is current for the
+   latest records, and **zero missing scope items**. Only then can the seller press **Release**, which captures the authorization
    (`/v2/payments/authorizations/{id}/capture`, `final_capture: true`).
-5. If the work cannot be completed, **Return funds** voids the authorization; the client is never charged.
+5. The client has a voice too: from the receipt link they can **pause the payment** by describing what is
+   wrong. The seller sees the concern, Gemini weighs it in the next review, and only the client can lift it.
+6. If the work cannot be completed, **Return funds** voids the authorization; the client is never charged.
 
 The AI judges the evidence; plain code decides whether money moves. A model output alone can never
 release funds, a stale review blocks release, and every PayPal call reuses a persisted
@@ -140,7 +142,7 @@ AI uploads are for review; the Delivery tab holds the client-facing URL and rece
 4. Open the link in a separate browser profile. Approve using a **personal sandbox account**,
    return to the payment page, then choose **Authorize & hold payment**. These are test funds.
 5. Refresh the seller's project. The Up next panel now shows the **release gate**: funds held, with
-   the other four checks still open and **Release** locked.
+   the other checks still open and **Release** locked.
 6. In **AI review**, upload a real PDF or text deliverable that intentionally lacks one agreed item.
    Choose **Check files with AI**, expand its checkpoints and inspect the page/line citations and missing item.
    Follow a suggested action to Delivery and save a real HTTPS handover link.

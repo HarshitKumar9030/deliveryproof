@@ -22,7 +22,7 @@ async function load(ownerId: string, id: string) {
     .findOne({ projectId: id, ownerId }, { sort: { createdAt: -1 } });
   const decision = evaluateRelease({
     hold: project.hold, deliveryLink: project.deliveryLink, confirmed: hasCurrentConfirmation(project),
-    review: saved?.review ?? null, reviewStale: !!saved && saved.fingerprint !== reviewFingerprint(project),
+    concern: project.concern, review: saved?.review ?? null, reviewStale: !!saved && saved.fingerprint !== reviewFingerprint(project),
   });
   if (project.status === 'dispute') decision.canRelease = false;
   return { db, projects, project, decision, reviewedAt: saved?.createdAt ?? null };

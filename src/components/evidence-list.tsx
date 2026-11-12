@@ -8,6 +8,7 @@ import {
   MousePointer2,
   MessageSquareCheck,
   ArrowUpRight,
+  MessageSquareWarning,
 } from 'lucide-react';
 import type { Evidence, EvidenceKind } from '@/domain/projects';
 import { Dialog } from './ui';
@@ -19,6 +20,7 @@ export const evidenceIcons: Record<EvidenceKind, typeof FileText> = {
   Delivery: Link2,
   Access: MousePointer2,
   Acknowledgement: MessageSquareCheck,
+  Message: MessageSquareWarning,
 };
 
 export function SourcePreview({

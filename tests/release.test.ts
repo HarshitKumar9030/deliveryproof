@@ -56,3 +56,14 @@ test('released capture must be completed for the held amount', () => {
   assert.throws(() => verifiedAuthorizationCapture({ id: 'CAP1', status: 'PENDING', amount: { currency_code: 'USD', value: '125.00' } }, '125.00'));
   assert.throws(() => verifiedAuthorizationCapture({ id: 'CAP1', status: 'COMPLETED', amount: { currency_code: 'USD', value: '1.00' } }, '125.00'));
 });
+
+test('an open client concern blocks release until the client resolves it', () => {
+  const concern = { state: 'open' as const, name: 'Sam', text: 'No typography section.', raisedAt: '2026-11-11T00:00:00Z' };
+  const blocked = evaluateRelease({ ...ready, concern });
+  assert.equal(blocked.canRelease, false);
+  const gate = blocked.gates.find(g => g.id === 'concern')!;
+  assert.equal(gate.ok, false);
+  assert.match(gate.detail, /No typography section/);
+  assert.equal(evaluateRelease({ ...ready, concern: { ...concern, state: 'resolved' } }).canRelease, true);
+  assert.equal(evaluateRelease(ready).gates.length, 6);
+});

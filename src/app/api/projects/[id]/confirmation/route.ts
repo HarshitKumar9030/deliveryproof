@@ -25,6 +25,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const links = db.collection<ConfirmationLink>('confirmationLinks');
     await links.createIndex({ tokenHash: 1 }, { unique: true });
     await links.insertOne({ tokenHash: hashConfirmationToken(token), ownerId: session.user.id, projectId: id, deliveryLink: project.deliveryLink, expiresAt });
-    return Response.json({ confirmationUrl: `${process.env.APP_ORIGIN || new URL(request.url).origin}/delivery/${token}`, expiresAt: expiresAt.toISOString() }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+    return Response.json({ confirmationUrl: `${process.env.APP_ORIGIN || request.headers.get('origin') || new URL(request.url).origin}/delivery/${token}`, expiresAt: expiresAt.toISOString() }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
   } catch { return Response.json({ error: 'Unable to create a confirmation link.' }, { status: 503 }); }
 }
